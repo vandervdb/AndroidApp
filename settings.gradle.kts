@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "AndroidApp"
 include(":app")
+include(":spotifyclient")
