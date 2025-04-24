@@ -1,0 +1,27 @@
+*.iml
+.gradle
+**/build/
+xcuserdata
+!src/**/build/
+local.properties
+.idea
+.DS_Store
+captures
+.externalNativeBuild
+.cxx
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+
+# Local configuration file (sdk keys, etc)
+/sentry.properties
+/release-keystore.properties
+/keystore-syslor.jks
+/easyscan-759e7-f0026bd39f95.json
+/fastlane/temp/binary_list.txt
+/threads_report.txt
+/CI/env_variables.sh
+/shared/reports/
