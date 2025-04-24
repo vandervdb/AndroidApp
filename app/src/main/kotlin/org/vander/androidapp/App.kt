@@ -19,7 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import org.vander.androidapp.navigation.BottomNavItem
 import org.vander.androidapp.navigation.BottomNavItem.Spotify
 import org.vander.androidapp.presentation.screen.HomeScreen
-import org.vander.androidapp.presentation.screen.SpotifyScreenTemp
+import org.vander.androidapp.presentation.screen.SpotifyScreenWrapper
 import org.vander.spotifyclient.presentation.screen.SpotifyScreen
 import org.vander.spotifyclient.presentation.viewmodel.SpotifyViewModel
 
@@ -57,7 +57,13 @@ fun App() {
         ) {
             composable(BottomNavItem.Home.route) { HomeScreen() }
             composable(Spotify.route) {
-                SpotifyScreenTemp()
+                val viewModel = hiltViewModel<SpotifyViewModel>()
+                val activity = LocalContext.current as MainActivity
+                SpotifyScreenWrapper(
+                    navController = navController,
+                    spotifyViewModel = viewModel,
+                    activity = activity
+                )
             }
         }
     }
