@@ -1,9 +1,9 @@
 package org.vander.spotifyclient.presentation.viewmodel
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
@@ -13,68 +13,72 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.vander.spotifyclient.data.client.auth.ConnectionState
-import org.vander.spotifyclient.data.client.auth.ConnectionState.Disconnected
-import org.vander.spotifyclient.data.client.auth.ISpotifyAuthClient
+import org.vander.spotifyclient.data.model.PlayerStateData
+import org.vander.spotifyclient.data.model.SpotifySessionState
+import org.vander.spotifyclient.usecase.SpotifySessionUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class SpotifyViewModel @Inject constructor(
-    private var spotifyClient: ISpotifyAuthClient
+    private val sessionUseCase: SpotifySessionUseCase
 ) : ViewModel() {
 
-    private val _connectionState = MutableStateFlow<ConnectionState>(Disconnected("Not connected"))
-    val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
-    private val _trackImage = MutableStateFlow<Bitmap?>(null)
-    val trackImage: StateFlow<Bitmap?> = _trackImage.asStateFlow()
+    val sessionState: StateFlow<SpotifySessionState> = sessionUseCase.sessionState
 
-    fun initSpotifyClient() {
+    private val _currentTrackName = MutableStateFlow<String?>(null)
+    val currentTrackName: StateFlow<String?> = _currentTrackName.asStateFlow()
+
+    private val _currentArtistName = MutableStateFlow<String?>(null)
+    val currentArtistName: StateFlow<String?> = _currentArtistName.asStateFlow()
+
+    private val _currentTrackImage = MutableStateFlow<Bitmap?>(null)
+    val currentTrackImage: StateFlow<Bitmap?> = _currentTrackImage.asStateFlow()
+
+    fun requestAuthorization(launcher: ActivityResultLauncher<Intent>) {
+        sessionUseCase.requestAuthorization(launcher)
+    }
+
+    fun launchAuthorizationFlow(activity: Activity) {
+        sessionUseCase.launchAuthorizationFlow(activity)
+    }
+
+    fun handleAuthResult(context: Context, result: ActivityResult) {
+        sessionUseCase.handleAuthResult(context, result, viewModelScope)
+    }
+
+    suspend fun playTrack(trackUri: String) {
+        sessionUseCase.play(trackUri)
+    }
+
+    suspend fun pauseTrack() {
+        sessionUseCase.pause()
+    }
+
+    suspend fun subscribeToPlayerState(onUpdate: (PlayerStateData) -> Unit) {
+        sessionUseCase.subscribeToPlayerState(onUpdate)
+    }
+
+    fun togglePlayPause() {
         viewModelScope.launch {
-            Log.d("SpotifyViewModel", "Initializing Spotify client...")
-            spotifyClient.setOnTrackImageReceived(::displayCover)
+            sessionUseCase.togglePlayPause()
         }
     }
-
-    fun connectToSpotify(activity: Activity, launcher: ActivityResultLauncher<Intent>) {
-        viewModelScope.launch {
-            Log.d("SpotifyViewModel", "Connecting to Spotify...")
-            // update the UI with the connection status
-            try {
-                spotifyClient.authorize(activity, launcher)
-                spotifyClient.connect()
-            } catch (e: Exception) {
-                Log.e("SpotifyViewModel", "Error connecting to Spotify", e)
-            }
-        }
+    fun disconnectSpotify() {
+        sessionUseCase.disconnect()
     }
 
-    fun play() {
-        viewModelScope.launch {
-            spotifyClient.play()
-        }
+    fun isConnected(): Boolean {
+        return sessionState.value is SpotifySessionState.Ready
     }
 
-    fun setStateFromConnectionResult(result: ActivityResult) {
-        _connectionState.value =
-            spotifyClient.handleSpotifyAuthResult(result)
+    fun isPlaying(): Boolean {
+//        return (sessionState.value as? SpotifySessionState.IsPaused)?.isPaused == false
+        return true
     }
 
-    private fun displayCover(image: Bitmap) {
-        Log.d("SpotifyViewModel", "Displaying cover...")
-        _trackImage.value = image
-    }
 
     override fun onCleared() {
         super.onCleared()
-        spotifyClient.disconnect()
+        disconnectSpotify()
     }
 }
-
-data class SpotifyUiState(
-    val isConnected: Boolean = false,
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
-    val accessToken: String? = null,
-    val albumCover: Bitmap? = null
-)
-

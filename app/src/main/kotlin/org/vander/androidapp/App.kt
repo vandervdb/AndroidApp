@@ -1,5 +1,7 @@
 package org.vander.androidapp
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -59,9 +61,18 @@ fun App() {
             composable(Spotify.route) {
                 val viewModel = hiltViewModel<SpotifyViewModel>()
                 val activity = LocalContext.current as MainActivity
+                val launcher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.StartActivityForResult(),
+                    onResult = { result ->
+                        activity?.let {
+                            viewModel.handleAuthResult(it, result)
+                        }
+                    }
+                )
                 SpotifyScreenWrapper(
                     navController = navController,
                     spotifyViewModel = viewModel,
+                    launcher = launcher,
                     activity = activity
                 )
             }

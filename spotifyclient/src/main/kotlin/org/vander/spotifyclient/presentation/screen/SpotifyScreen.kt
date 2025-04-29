@@ -1,105 +1,68 @@
 package org.vander.spotifyclient.presentation.screen
 
 import android.app.Activity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.displayCutoutPadding
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import org.vander.spotifyclient.data.client.auth.ConnectionState
+import org.vander.spotifyclient.data.model.SpotifySessionState
 import org.vander.spotifyclient.presentation.viewmodel.SpotifyViewModel
-
 
 @Composable
 fun SpotifyScreen(
     navController: NavController,
-    spotifyViewModel: SpotifyViewModel = viewModel(),
-    activity: Activity,
+    viewModel: SpotifyViewModel,
+    launcher: ActivityResultLauncher<Intent>,
+    activity: Activity?,
     modifier: Modifier
 ) {
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
-        onResult = { spotifyViewModel.setStateFromConnectionResult(it) }
-    )
-    val state by spotifyViewModel.connectionState.collectAsState()
-    val image by spotifyViewModel.trackImage.collectAsState()
+    val sessionState by viewModel.sessionState.collectAsState()
 
-    LaunchedEffect(key1 = Unit) {
-        activity?.let {
-            spotifyViewModel.connectToSpotify(it, launcher)
-        }
+    LaunchedEffect(Unit) {
+        viewModel.requestAuthorization(launcher)
+        viewModel.launchAuthorizationFlow(activity!!)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .displayCutoutPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally
+
+    Box(
+        modifier = modifier.padding(32.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Text(text = "Spotify Screen")
-
-        when (state) {
-            is ConnectionState.Connected -> {
-                Text(text = "Connected to Spotify with token: ${(state as ConnectionState.Connected).accessToken}")
+        when (sessionState) {
+            is SpotifySessionState.Idle,
+            is SpotifySessionState.Authorizing,
+            is SpotifySessionState.ConnectingRemote -> {
+                CircularProgressIndicator()
             }
 
-            is ConnectionState.Disconnected -> {
-                Text(text = "Disconnected from Spotify")
+            is SpotifySessionState.Ready -> {
+                Text("✅ Connecté à Spotify Remote !")
             }
 
-            is ConnectionState.Connecting -> {
-                SpotifyConnectingProgress()
+            is SpotifySessionState.Failed -> {
+                Text(
+                    text = "❌ Erreur: ${(sessionState as SpotifySessionState.Failed).exception.message}",
+                    color = MaterialTheme.colorScheme.error
+                )
             }
 
-            is ConnectionState.Failed -> {
-                Text(text = "Failed to connect to Spotify")
-            }
+            SpotifySessionState.IsPaused -> TODO()
         }
+    }
 
+    if (sessionState is SpotifySessionState.Failed) {
         Button(
-            onClick = { spotifyViewModel.play() },
-            content = { Text(text = "Play") },
-            enabled = state is ConnectionState.Connected
-        )
-
-        image?.let {
-            Image(
-                bitmap = it.asImageBitmap(),
-                contentDescription = "Pochette",
-                modifier = Modifier
-                    .width(200.dp)
-                    .height(200.dp)
-            )
-        } ?: Text("Chargement de l’image...")
-
+            onClick = { activity?.let { viewModel.launchAuthorizationFlow(it) } },
+            modifier = Modifier
+//                .align(Alignment.BottomCenter)
+                .padding(16.dp)
+        ) {
+            Text("Réessayer")
+        }
     }
 }
-
-@Composable
-fun SpotifyConnectingProgress() {
-    CircularProgressIndicator(
-        modifier = Modifier.width(64.dp),
-        color = MaterialTheme.colorScheme.secondary,
-        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-    )
-}
-

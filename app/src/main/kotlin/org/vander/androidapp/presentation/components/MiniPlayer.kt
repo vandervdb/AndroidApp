@@ -1,65 +1,85 @@
 package org.vander.androidapp.presentation.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
+import org.vander.spotifyclient.presentation.viewmodel.SpotifyViewModel
+
 
 @Composable
-fun MiniPlayer(
-    trackTitle: String,
-    onPlayPauseClick: () -> Unit
-) {
-    Surface(
-        tonalElevation = 3.dp,
-        shadowElevation = 3.dp,
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Row(
+fun MiniPlayer(viewModel: SpotifyViewModel) {
+
+    if (viewModel.isConnected()) {
+        Surface(
+            tonalElevation = 4.dp,
+            color = MaterialTheme.colorScheme.surface,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(64.dp)
-                .padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .background(MaterialTheme.colorScheme.surface)
         ) {
-            IconButton(onClick = onPlayPauseClick) {
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Play",
-                    tint = MaterialTheme.colorScheme.primary
-                )
+            Row(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                viewModel.currentTrackImage.collectAsState().value?.let { bitmap ->
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "Album Cover",
+                        modifier = Modifier
+                            .size(48.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = viewModel.currentTrackName.collectAsState().value ?: "Unknown Track",
+                        style = MaterialTheme.typography.bodyLarge,
+                        maxLines = 1
+                    )
+                    Text(
+                        text = viewModel.currentArtistName.collectAsState().value
+                            ?: "Unknown Artist",
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1
+                    )
+                }
+
+                IconButton(
+                    onClick = { viewModel.togglePlayPause() }
+                ) {
+                    Icon(
+                        imageVector = if (viewModel.isPlaying()) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = if (viewModel.isPlaying()) "Pause" else "Play"
+                    )
+                }
             }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Text(
-                text = trackTitle,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
         }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, heightDp = 64)
-@Composable
-fun MiniPlayerPreview() {
-    MaterialTheme {
-        MiniPlayer(
-            trackTitle = "Elvis - Mystery Train",
-            onPlayPauseClick = {}
-        )
     }
 }

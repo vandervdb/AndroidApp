@@ -1,51 +1,51 @@
 package org.vander.androidapp.presentation.screen
 
 import android.app.Activity
+import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import org.vander.androidapp.presentation.components.MiniPlayer
 import org.vander.spotifyclient.presentation.screen.SpotifyScreen
 import org.vander.spotifyclient.presentation.viewmodel.SpotifyViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SpotifyScreenWrapper(navController: NavController, spotifyViewModel: SpotifyViewModel, activity : Activity) {
-
+fun SpotifyScreenWrapper(
+    navController: NavController,
+    spotifyViewModel: SpotifyViewModel,
+    launcher: ActivityResultLauncher<Intent>,
+    activity: Activity
+) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Spotify") },
+                title = { Text (
+                    text="Spotify",) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { /* Action Play */ }
-            ) {
-                Icon(Icons.Default.PlayArrow, contentDescription = "Play")
-            }
-        },
-        floatingActionButtonPosition = FabPosition.End,
-
+        bottomBar = {
+            MiniPlayer(spotifyViewModel)
+        }
     ) { innerPadding ->
         SpotifyScreen(
             navController = navController,
-            spotifyViewModel = spotifyViewModel,
+            viewModel = spotifyViewModel,
+            launcher = launcher,
             activity = activity,
             modifier = Modifier.padding(innerPadding)
         )
