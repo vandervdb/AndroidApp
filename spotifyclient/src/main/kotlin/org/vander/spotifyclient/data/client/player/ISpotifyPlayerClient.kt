@@ -1,9 +1,11 @@
 package org.vander.spotifyclient.data.client.player
 
+import com.spotify.android.appremote.api.SpotifyAppRemote
 import org.vander.spotifyclient.domain.state.PlayerStateData
 
 interface ISpotifyPlayerClient {
-    suspend fun subscribeToPlayerState(onUpdate: (PlayerStateData) -> Unit)
+    fun registerAppRemotePlayerState(remote: SpotifyAppRemote, onPlayerEvent: (PlayerStateData) -> Unit)
+    suspend fun subscribeToPlayerState()
     suspend fun play(trackUri: String)
     suspend fun pause(): Result<Unit>
     suspend fun resume(): Result<Unit>

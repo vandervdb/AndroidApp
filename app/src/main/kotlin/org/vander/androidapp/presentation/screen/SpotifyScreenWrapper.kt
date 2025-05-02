@@ -37,9 +37,6 @@ fun SpotifyScreenWrapper(
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
-        },
-        bottomBar = {
-            MiniPlayer(spotifyViewModel)
         }
     ) { innerPadding ->
         SpotifyScreen(

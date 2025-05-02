@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import org.vander.androidapp.presentation.components.MiniPlayer
 import org.vander.androidapp.presentation.viewmodel.SpotifyViewModel
 import org.vander.spotifyclient.domain.state.SpotifySessionState
 
@@ -61,6 +62,7 @@ fun SpotifyScreen(
 
             SpotifySessionState.IsPaused -> TODO()
         }
+        MiniPlayer(viewModel)
     }
 
     if (sessionState is SpotifySessionState.Failed) {

@@ -15,65 +15,57 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import org.vander.spotifyclient.domain.state.SpotifySessionState
+import org.vander.spotifyclient.domain.usecase.SpotifyPlayerRemoteUseCase
 import org.vander.spotifyclient.domain.usecase.SpotifySessionUseCase
 import javax.inject.Inject
 
 @HiltViewModel
-open class SpotifyViewModel @Inject constructor(
-    private val sessionUseCase: SpotifySessionUseCase
+class SpotifyViewModel @Inject constructor(
+    private val sessionUseCase: SpotifySessionUseCase,
+    private val playerUseCase: SpotifyPlayerRemoteUseCase
 ) : ViewModel() {
 
-    open val sessionState: StateFlow<SpotifySessionState> = sessionUseCase.sessionState
+    val sessionState: StateFlow<SpotifySessionState> = sessionUseCase.sessionState
+    val playerState: StateFlow<PlayerStateData> = playerUseCase.playerState
 
-    private val _currentTrackName = MutableStateFlow<String?>(null)
-    val currentTrackName: StateFlow<String?> = _currentTrackName.asStateFlow()
 
-    private val _currentArtistName = MutableStateFlow<String?>(null)
-    val currentArtistName: StateFlow<String?> = _currentArtistName.asStateFlow()
 
-    private val _currentTrackImage = MutableStateFlow<Bitmap?>(null)
-    val currentTrackImage: StateFlow<Bitmap?> = _currentTrackImage.asStateFlow()
-
-    open fun requestAuthorization(launcher: ActivityResultLauncher<Intent>) {
+    fun requestAuthorization(launcher: ActivityResultLauncher<Intent>) {
         sessionUseCase.requestAuthorization(launcher)
     }
 
-    open fun launchAuthorizationFlow(activity: Activity) {
+    fun launchAuthorizationFlow(activity: Activity) {
         sessionUseCase.launchAuthorizationFlow(activity)
     }
 
-    open fun handleAuthResult(context: Context, result: ActivityResult) {
+    fun handleAuthResult(context: Context, result: ActivityResult) {
         sessionUseCase.handleAuthResult(context, result, viewModelScope)
     }
 
-    open suspend fun playTrack(trackUri: String) {
-        sessionUseCase.play(trackUri)
-    }
-
-    open suspend fun pauseTrack() {
-        sessionUseCase.pause()
-    }
-
-    open suspend fun subscribeToPlayerState(onUpdate: (PlayerStateData) -> Unit) {
-        sessionUseCase.subscribeToPlayerState(onUpdate)
-    }
-
-    open fun togglePlayPause() {
+    fun playTrack(trackUri: String) {
         viewModelScope.launch {
-            sessionUseCase.togglePlayPause()
+            playerUseCase.play(trackUri)
         }
     }
 
-    open fun disconnectSpotify() {
+    fun pauseTrack() {
+        viewModelScope.launch {
+            playerUseCase.pause()
+        }
+    }
+
+    fun togglePlayPause() {
+        viewModelScope.launch {
+            playerUseCase.togglePlayPause()
+        }
+    }
+
+    fun disconnectSpotify() {
         sessionUseCase.disconnect()
     }
 
-    open fun isConnected(): Boolean {
-        return sessionState.value is SpotifySessionState.Ready
-    }
 
-    open fun isPlaying(): Boolean {
-//        return (sessionState.value as? SpotifySessionState.IsPaused)?.isPaused == false
+    fun isPlaying(): Boolean {
         return true
     }
 
@@ -82,4 +74,5 @@ open class SpotifyViewModel @Inject constructor(
         super.onCleared()
         disconnectSpotify()
     }
+
 }

@@ -12,32 +12,38 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.vander.spotifyclient.data.client.auth.ISpotifyAuthClient
-import org.vander.spotifyclient.data.client.player.ISpotifyPlayerClient
 import org.vander.spotifyclient.data.client.remote.ISpotifyRemoteClient
-import org.vander.spotifyclient.domain.state.PlayerStateData
+import org.vander.spotifyclient.domain.error.SpotifySessionError
 import org.vander.spotifyclient.domain.state.SpotifySessionState
 import javax.inject.Inject
 
-open class SpotifySessionUseCase @Inject constructor(
+class SpotifySessionUseCase @Inject constructor(
     private val authClient: ISpotifyAuthClient,
-    private val remoteClient: ISpotifyRemoteClient,
-    private val playerClient: ISpotifyPlayerClient,
+    private val remoteClient: ISpotifyRemoteClient
 ) {
+    val dispatcher = Dispatchers.Main
+
     private val _sessionState = MutableStateFlow<SpotifySessionState>(SpotifySessionState.Idle)
     val sessionState: StateFlow<SpotifySessionState> = _sessionState.asStateFlow()
 
-    private var pendingLauncher: ActivityResultLauncher<Intent>? = null
+    private var launchAuthFlow: ActivityResultLauncher<Intent>? = null
 
-    fun requestAuthorization(launcher: ActivityResultLauncher<Intent>) {
-        pendingLauncher = launcher
+    fun requestAuthorization(launchAuth: ActivityResultLauncher<Intent>) {
+        launchAuthFlow = launchAuth
         _sessionState.value = SpotifySessionState.Authorizing
     }
 
     fun launchAuthorizationFlow(activity: Activity) {
         try {
-            pendingLauncher?.let { authClient.authorize(activity, it) }
+            launchAuthFlow?.let {
+                authClient.authorize(activity, it)
+            } ?: run {
+                _sessionState.value = SpotifySessionState.Failed(
+                    SpotifySessionError.UnknownError(Exception("Authorization flow not set"))
+                )
+            }
         } catch (e: Exception) {
-            _sessionState.value = SpotifySessionState.Failed(e)
+            _sessionState.value = SpotifySessionState.Failed(SpotifySessionError.UnknownError(e))
         }
     }
 
@@ -48,13 +54,20 @@ open class SpotifySessionUseCase @Inject constructor(
     ) {
         authClient.handleSpotifyAuthResult(result) { authResult ->
             if (authResult.isSuccess) {
-                connectRemote(context, coroutineScope)
+                coroutineScope.launch {
+                    connectRemote(context, coroutineScope)
+                }
             } else {
                 _sessionState.value = SpotifySessionState.Failed(
-                    authResult.exceptionOrNull() ?: Exception("Unknown error")
+                    SpotifySessionError.AuthFailed(Exception("Authorization failed with unknown error"))
                 )
             }
         }
+    }
+
+    fun disconnect() {
+        remoteClient.disconnect()
+        _sessionState.value = SpotifySessionState.Idle
     }
 
     private fun connectRemote(
@@ -62,35 +75,15 @@ open class SpotifySessionUseCase @Inject constructor(
         coroutineScope: CoroutineScope
     ) {
         _sessionState.value = SpotifySessionState.ConnectingRemote
-        coroutineScope.launch(Dispatchers.Main) {
+        coroutineScope.launch(dispatcher) {
             val result = remoteClient.connect(context)
-            _sessionState.value = if (result.isSuccess) SpotifySessionState.Ready
-            else SpotifySessionState.Failed(result.exceptionOrNull() ?: Exception("Unknown error"))
+            if (result.isSuccess) {
+                _sessionState.value = SpotifySessionState.Ready
+            } else {
+                _sessionState.value = SpotifySessionState.Failed(
+                    SpotifySessionError.RemoteConnectionFailed(result.exceptionOrNull())
+                )
+            }
         }
-    }
-
-    suspend fun play(trackUri: String) {
-        playerClient.play(trackUri)
-    }
-
-    suspend fun pause() {
-        playerClient.pause()
-    }
-
-    suspend fun togglePlayPause() {
-        if (playerClient.isPlaying()) {
-            pause()
-        } else {
-            //resume()
-        }
-    }
-
-    suspend fun subscribeToPlayerState(onUpdate: (PlayerStateData) -> Unit) {
-        playerClient.subscribeToPlayerState(onUpdate)
-    }
-
-    fun disconnect() {
-        remoteClient.disconnect()
-        _sessionState.value = SpotifySessionState.Idle
     }
 }

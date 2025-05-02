@@ -2,6 +2,8 @@ package org.vander.spotifyclient.data.client.player
 
 import android.util.Log
 import com.spotify.android.appremote.api.SpotifyAppRemote
+import com.spotify.protocol.types.Track
+import org.vander.spotifyclient.data.mapper.toPlayerStateData
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import javax.inject.Inject
 
@@ -12,8 +14,26 @@ class SpotifyPlayerClient @Inject constructor() : ISpotifyPlayerClient {
     }
 
     private var spotifyAppRemote: SpotifyAppRemote? = null
-    override suspend fun subscribeToPlayerState(onUpdate: (PlayerStateData) -> Unit) {
-        TODO("Not yet implemented")
+    private lateinit var onPlayerEvent: (PlayerStateData) -> Unit
+
+    override fun registerAppRemotePlayerState(remote: SpotifyAppRemote, onPlayerEvent: (PlayerStateData) -> Unit) {
+        this.spotifyAppRemote = remote
+        this.onPlayerEvent = onPlayerEvent
+    }
+
+    override suspend fun subscribeToPlayerState() {
+        spotifyAppRemote?.let {
+            it.playerApi.subscribeToPlayerState().setEventCallback {
+                val track: Track = it.track
+                Log.d(
+                    TAG,
+                    track.name + " by " + track.artist.name + "(paused: " + it.isPaused + " / coverUri: " + track.imageUri + ")"
+                )
+                val playerStateData = it.toPlayerStateData()
+                Log.d(TAG, "Player state: $playerStateData")
+                onPlayerEvent(playerStateData)
+            }
+        }
     }
 
     override suspend fun play(trackUri: String) {
