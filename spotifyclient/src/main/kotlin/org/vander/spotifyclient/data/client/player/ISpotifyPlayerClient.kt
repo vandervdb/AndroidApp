@@ -1,6 +1,6 @@
 package org.vander.spotifyclient.data.client.player
 
-import org.vander.spotifyclient.data.model.PlayerStateData
+import org.vander.spotifyclient.domain.state.PlayerStateData
 
 interface ISpotifyPlayerClient {
     suspend fun subscribeToPlayerState(onUpdate: (PlayerStateData) -> Unit)

@@ -23,7 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
-import org.vander.spotifyclient.presentation.viewmodel.SpotifyViewModel
+import org.vander.androidapp.presentation.viewmodel.SpotifyViewModel
 
 
 @Composable

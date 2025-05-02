@@ -1,4 +1,4 @@
-package org.vander.spotifyclient.data.model
+package org.vander.spotifyclient.domain.state
 
 sealed class SpotifyRemoteClientState {
     object NotConnected : SpotifyRemoteClientState()

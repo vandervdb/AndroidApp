@@ -6,7 +6,6 @@ import android.util.Log
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
-import com.spotify.protocol.types.Track
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.vander.spotify.data.utils.CLIENT_ID
 import org.vander.spotify.data.utils.REDIRECT_URI
@@ -68,23 +67,23 @@ class SpotifyRemoteClient @Inject constructor(private val context: Context?) : I
         }
     }
 
-    override fun registerAppRemotePlayerState(remote: SpotifyAppRemote) {
-        remote.playerApi.subscribeToPlayerState().setEventCallback {
-            val track: Track = it.track
-            Log.d(TAG, track.name + " by " + track.artist.name + "(paused: " + it.isPaused + ")")
-//            remote.imagesApi.getImage(track.imageUri)
-//                .setResultCallback { bitmap ->
-//                    Log.d(
-//                        TAG,
-//                        "Image récupérée:Url: ${track.imageUri} -  ${bitmap.width} x ${bitmap.height}"
-//                    )
-//                    onTrackImageReceived?.invoke(bitmap)
-//                }
-//                .setErrorCallback {
-//                    Log.e(TAG, "Erreur lors de la récupération de l'image: ${it.message}")
-//                }
-        }
-    }
+//    override fun registerAppRemotePlayerState(remote: SpotifyAppRemote) {
+//        remote.playerApi.subscribeToPlayerState().setEventCallback {
+//            val track: Track = it.track
+//            Log.d(TAG, track.name + " by " + track.artist.name + "(paused: " + it.isPaused + ")")
+////            remote.imagesApi.getImage(track.imageUri)
+////                .setResultCallback { bitmap ->
+////                    Log.d(
+////                        TAG,
+////                        "Image récupérée:Url: ${track.imageUri} -  ${bitmap.width} x ${bitmap.height}"
+////                    )
+////                    onTrackImageReceived?.invoke(bitmap)
+////                }
+////                .setErrorCallback {
+////                    Log.e(TAG, "Erreur lors de la récupération de l'image: ${it.message}")
+////                }
+//        }
+//    }
 
     override fun getRemote(): SpotifyAppRemote? = spotifyAppRemote
 

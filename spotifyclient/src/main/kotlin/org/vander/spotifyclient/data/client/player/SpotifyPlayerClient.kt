@@ -2,7 +2,7 @@ package org.vander.spotifyclient.data.client.player
 
 import android.util.Log
 import com.spotify.android.appremote.api.SpotifyAppRemote
-import org.vander.spotifyclient.data.model.PlayerStateData
+import org.vander.spotifyclient.domain.state.PlayerStateData
 import javax.inject.Inject
 
 class SpotifyPlayerClient @Inject constructor() : ISpotifyPlayerClient {
@@ -18,9 +18,7 @@ class SpotifyPlayerClient @Inject constructor() : ISpotifyPlayerClient {
 
     override suspend fun play(trackUri: String) {
         Log.d(TAG, "play: ")
-        spotifyAppRemote?.let {
-            it.playerApi.play(trackUri)
-        }
+        spotifyAppRemote?.playerApi?.play(trackUri)
     }
 
     override suspend fun pause(): Result<Unit> {

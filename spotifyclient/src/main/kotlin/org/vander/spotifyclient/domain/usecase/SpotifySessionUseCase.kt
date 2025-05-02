@@ -1,4 +1,4 @@
-package org.vander.spotifyclient.usecase
+package org.vander.spotifyclient.domain.usecase
 
 import android.app.Activity
 import android.content.Context
@@ -14,11 +14,11 @@ import kotlinx.coroutines.launch
 import org.vander.spotifyclient.data.client.auth.ISpotifyAuthClient
 import org.vander.spotifyclient.data.client.player.ISpotifyPlayerClient
 import org.vander.spotifyclient.data.client.remote.ISpotifyRemoteClient
-import org.vander.spotifyclient.data.model.PlayerStateData
-import org.vander.spotifyclient.data.model.SpotifySessionState
+import org.vander.spotifyclient.domain.state.PlayerStateData
+import org.vander.spotifyclient.domain.state.SpotifySessionState
 import javax.inject.Inject
 
-class SpotifySessionUseCase @Inject constructor(
+open class SpotifySessionUseCase @Inject constructor(
     private val authClient: ISpotifyAuthClient,
     private val remoteClient: ISpotifyRemoteClient,
     private val playerClient: ISpotifyPlayerClient,

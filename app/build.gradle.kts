@@ -47,6 +47,9 @@ android {
 }
 
 dependencies {
+
+    implementation(project(":spotifyclient"))
+
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     kapt(libs.hilt.android.compiler)
@@ -74,8 +77,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     kapt("androidx.hilt:hilt-compiler:1.1.0")
-
-    implementation(project(":spotifyclient"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

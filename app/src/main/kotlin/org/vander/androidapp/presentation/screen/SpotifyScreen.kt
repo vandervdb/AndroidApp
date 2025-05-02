@@ -1,17 +1,25 @@
-package org.vander.spotifyclient.presentation.screen
+package org.vander.androidapp.presentation.screen
 
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import org.vander.spotifyclient.data.model.SpotifySessionState
-import org.vander.spotifyclient.presentation.viewmodel.SpotifyViewModel
+import org.vander.androidapp.presentation.viewmodel.SpotifyViewModel
+import org.vander.spotifyclient.domain.state.SpotifySessionState
+
 
 @Composable
 fun SpotifyScreen(
@@ -59,7 +67,6 @@ fun SpotifyScreen(
         Button(
             onClick = { activity?.let { viewModel.launchAuthorizationFlow(it) } },
             modifier = Modifier
-//                .align(Alignment.BottomCenter)
                 .padding(16.dp)
         ) {
             Text("Réessayer")

@@ -1,4 +1,4 @@
-package org.vander.spotifyclient.data.model
+package org.vander.spotifyclient.domain.state
 
 import com.spotify.protocol.types.Track
 
