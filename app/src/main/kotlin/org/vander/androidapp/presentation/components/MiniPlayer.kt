@@ -1,5 +1,6 @@
 package org.vander.androidapp.presentation.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -72,8 +73,9 @@ fun MiniPlayer(viewModel: SpotifyViewModel) {
                 IconButton(
                     onClick = { viewModel.togglePlayPause() }
                 ) {
+                    Log.d("momo", "isPaused: ${playerState.isPaused}")
                     Icon(
-                        imageVector = if (viewModel.isPlaying()) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        imageVector = if (playerState.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
                         contentDescription = if (viewModel.isPlaying()) "Pause" else "Play"
                     )
                 }

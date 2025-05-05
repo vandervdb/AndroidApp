@@ -54,11 +54,15 @@ class SpotifyPlayerRemoteUseCase @Inject constructor(
         playerClient.pause()
     }
 
+    suspend fun resume() {
+        playerClient.resume()
+    }
+
     suspend fun togglePlayPause() {
         if (playerClient.isPlaying()) {
             pause()
         } else {
-            //resume()
+            resume()
         }
     }
 }

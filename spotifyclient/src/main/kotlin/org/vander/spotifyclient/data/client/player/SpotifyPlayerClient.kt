@@ -2,6 +2,7 @@ package org.vander.spotifyclient.data.client.player
 
 import android.util.Log
 import com.spotify.android.appremote.api.PlayerApi
+import com.spotify.protocol.types.PlayerState
 import com.spotify.protocol.types.Track
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.vander.spotifyclient.data.client.player.domain.ISpotifyPlayerClient
 import org.vander.spotifyclient.data.client.remote.ISpotifyAppRemoteProvider
 import org.vander.spotifyclient.data.mapper.toPlayerStateData
-import org.vander.spotifyclient.domain.state.PlayerState
+import org.vander.spotifyclient.domain.state.PlayerConnectionState
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import javax.inject.Inject
 
@@ -23,8 +24,10 @@ class SpotifyPlayerClient @Inject constructor(
 
     private val playerApi: PlayerApi?
         get() = appRemoteProvider.get()?.playerApi
-    private val _playerState = MutableStateFlow<PlayerState>(PlayerState.NotConnected)
-    override val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
+    private var playerStateData: PlayerStateData = PlayerStateData.empty()
+    private val _playerConnectionState = MutableStateFlow<PlayerConnectionState>(PlayerConnectionState.NotConnected)
+    override val playerConnectionState: StateFlow<PlayerConnectionState> = _playerConnectionState.asStateFlow()
+
 
     override suspend fun subscribeToPlayerState(function: (PlayerStateData) -> Unit) {
         playerApi?.let {
@@ -34,13 +37,13 @@ class SpotifyPlayerClient @Inject constructor(
                     TAG,
                     track.name + " by " + track.artist.name + "(paused: " + it.isPaused + " / coverUri: " + track.imageUri + ")"
                 )
-                val playerStateData = it.toPlayerStateData()
+                this.playerStateData = it.toPlayerStateData()
                 Log.d(TAG, "Player state: $playerStateData")
                 function(playerStateData)
             }
         } ?: run {
             Log.e(TAG, "spotifyPlayerApi is null")
-            _playerState.value = PlayerState.NotConnected
+            _playerConnectionState.value = PlayerConnectionState.NotConnected
         }
     }
 
@@ -49,12 +52,12 @@ class SpotifyPlayerClient @Inject constructor(
         playerApi?.play(trackUri)
     }
 
-    override suspend fun pause(): Result<Unit> {
-        TODO("Not yet implemented")
+    override suspend fun pause() {
+        playerApi?.pause()
     }
 
-    override suspend fun resume(): Result<Unit> {
-        TODO("Not yet implemented")
+    override suspend fun resume() {
+        playerApi?.resume()
     }
 
     override suspend fun skipNext(): Result<Unit> {
@@ -82,6 +85,6 @@ class SpotifyPlayerClient @Inject constructor(
     }
 
     override fun isPlaying(): Boolean {
-        TODO("Not yet implemented")
+        return playerStateData.playing
     }
 }
