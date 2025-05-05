@@ -1,6 +1,5 @@
 package org.vander.androidapp.presentation.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,7 +21,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import org.vander.androidapp.presentation.viewmodel.SpotifyViewModel
 import org.vander.spotifyclient.domain.state.SpotifySessionState
@@ -32,7 +30,7 @@ import org.vander.spotifyclient.domain.state.SpotifySessionState
 fun MiniPlayer(viewModel: SpotifyViewModel) {
 
     val sessionState by viewModel.sessionState.collectAsState()
-    val playerState by viewModel.playerState.collectAsState()
+    val playerState by viewModel.playerStateData.collectAsState()
 
     if (sessionState is SpotifySessionState.Ready) {
         Surface(
@@ -49,7 +47,10 @@ fun MiniPlayer(viewModel: SpotifyViewModel) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
-                SpotifyTrackCover(imageUri = playerState?.trackId ?: "", modifier = Modifier.size(48.dp))
+                SpotifyTrackCover(
+                    imageUri = playerState?.trackId ?: "",
+                    modifier = Modifier.size(48.dp)
+                )
 
                 Spacer(modifier = Modifier.padding(horizontal = 8.dp))
 

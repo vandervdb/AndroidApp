@@ -1,30 +1,21 @@
 package org.vander.spotifyclient.di
 
-import android.content.Context
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
-import dagger.hilt.android.scopes.ViewModelScoped
-import org.vander.spotifyclient.data.client.remote.ISpotifyRemoteClient
-import org.vander.spotifyclient.data.client.remote.SpotifyRemoteClient
+import dagger.hilt.components.SingletonComponent
+import org.vander.spotifyclient.data.client.remote.ISpotifyAppRemoteProvider
+import org.vander.spotifyclient.data.client.remote.SpotifyAppRemoteProvider
+import javax.inject.Singleton
 
 @Module
-@InstallIn(ViewModelComponent::class)
+@InstallIn(SingletonComponent::class)
 abstract class RemoteModule {
 
     @Binds
-    @ViewModelScoped
+    @Singleton
     abstract fun bindSpotifyRemoteClient(
-        spotifyRemoteClient: SpotifyRemoteClient
-    ): ISpotifyRemoteClient
+        spotifyAppRemoteProvider: SpotifyAppRemoteProvider
+    ): ISpotifyAppRemoteProvider
 
-    companion object {
-        @Provides
-        @ViewModelScoped
-        fun provideSpotifyRemoteClient(context: Context): SpotifyRemoteClient {
-            return SpotifyRemoteClient(context)
-        }
-    }
 }

@@ -1,7 +1,5 @@
 package org.vander.spotifyclient.domain.state
 
-import com.spotify.protocol.types.Track
-
 data class PlayerStateData(
     val trackName: String,
     val artistName: String,

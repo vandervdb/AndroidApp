@@ -3,16 +3,14 @@ package org.vander.androidapp.presentation.viewmodel
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.vander.spotifyclient.data.client.player.domain.IPlayerStateRepository
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import org.vander.spotifyclient.domain.state.SpotifySessionState
 import org.vander.spotifyclient.domain.usecase.SpotifyPlayerRemoteUseCase
@@ -22,12 +20,12 @@ import javax.inject.Inject
 @HiltViewModel
 class SpotifyViewModel @Inject constructor(
     private val sessionUseCase: SpotifySessionUseCase,
-    private val playerUseCase: SpotifyPlayerRemoteUseCase
+    private val playerUseCase: SpotifyPlayerRemoteUseCase,
+    private val playerRepository: IPlayerStateRepository
 ) : ViewModel() {
 
     val sessionState: StateFlow<SpotifySessionState> = sessionUseCase.sessionState
-    val playerState: StateFlow<PlayerStateData> = playerUseCase.playerState
-
+    val playerStateData: StateFlow<PlayerStateData> = playerRepository.playerStateData
 
 
     fun requestAuthorization(launcher: ActivityResultLauncher<Intent>) {
@@ -41,6 +39,7 @@ class SpotifyViewModel @Inject constructor(
     fun handleAuthResult(context: Context, result: ActivityResult) {
         sessionUseCase.handleAuthResult(context, result, viewModelScope)
     }
+
 
     fun playTrack(trackUri: String) {
         viewModelScope.launch {

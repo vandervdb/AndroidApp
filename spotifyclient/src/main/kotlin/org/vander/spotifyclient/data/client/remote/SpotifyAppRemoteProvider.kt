@@ -13,19 +13,24 @@ import org.vander.spotify.data.utils.CLIENT_ID
 import org.vander.spotify.data.utils.REDIRECT_URI
 import org.vander.spotifyclient.domain.state.SpotifyRemoteClientState
 import javax.inject.Inject
+import javax.inject.Singleton
 
-class SpotifyRemoteClient @Inject constructor(private val context: Context?) :
-    ISpotifyRemoteClient {
+@Singleton
+class SpotifyAppRemoteProvider @Inject constructor() : ISpotifyAppRemoteProvider {
     companion object {
-        private const val TAG = "SpotifyClient"
+        private const val TAG = "SpotifyAppRemoteProvider"
     }
 
-    private var spotifyAppRemote: SpotifyAppRemote? = null
-    private var _remoteState = MutableStateFlow<SpotifyRemoteClientState>(SpotifyRemoteClientState.NotConnected)
+    private var _remoteState =
+        MutableStateFlow<SpotifyRemoteClientState>(SpotifyRemoteClientState.NotConnected)
     override val remoteState: StateFlow<SpotifyRemoteClientState> = _remoteState.asStateFlow()
+
+
+    private var spotifyAppRemote: SpotifyAppRemote? = null
 
     override suspend fun connect(context: Context): Result<Unit> {
         _remoteState.value = SpotifyRemoteClientState.Connecting
+
         return suspendCancellableCoroutine { continuation ->
             val connectionParams = ConnectionParams.Builder(CLIENT_ID)
                 .setRedirectUri(REDIRECT_URI)
@@ -36,11 +41,13 @@ class SpotifyRemoteClient @Inject constructor(private val context: Context?) :
                 context,
                 connectionParams,
                 object : Connector.ConnectionListener {
-                    override fun onConnected(spotifyRemote: SpotifyAppRemote) {
-                        spotifyAppRemote = spotifyRemote
-                        _remoteState.value = SpotifyRemoteClientState.Connected(spotifyRemote)
+                    override fun onConnected(remote: SpotifyAppRemote) {
+                        Log.d(TAG, "Connected to remote")
+                        spotifyAppRemote = remote
+                        _remoteState.value = SpotifyRemoteClientState.Connected
                         continuation.resumeWith(Result.success(Result.success(Unit)))
                     }
+
                     override fun onFailure(error: Throwable) {
                         _remoteState.value = SpotifyRemoteClientState.Failed(error as Exception)
                         Log.e(TAG, "SpotifyAppRemote connection failed", error)
@@ -50,12 +57,12 @@ class SpotifyRemoteClient @Inject constructor(private val context: Context?) :
         }
     }
 
+    override fun get(): SpotifyAppRemote? = spotifyAppRemote
+
     override fun disconnect() {
-        Log.d(TAG, "disconnect: ")
-        spotifyAppRemote?.let {
-            SpotifyAppRemote.disconnect(it)
-        }
+        spotifyAppRemote?.let { SpotifyAppRemote.disconnect(it) }
+        spotifyAppRemote = null
+        _remoteState.value = SpotifyRemoteClientState.NotConnected
     }
 
 }
-

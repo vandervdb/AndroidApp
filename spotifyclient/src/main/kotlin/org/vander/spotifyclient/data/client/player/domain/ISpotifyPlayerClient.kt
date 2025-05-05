@@ -1,11 +1,12 @@
-package org.vander.spotifyclient.data.client.player
+package org.vander.spotifyclient.data.client.player.domain
 
-import com.spotify.android.appremote.api.SpotifyAppRemote
+import kotlinx.coroutines.flow.StateFlow
+import org.vander.spotifyclient.domain.state.PlayerState
 import org.vander.spotifyclient.domain.state.PlayerStateData
 
 interface ISpotifyPlayerClient {
-    fun registerAppRemotePlayerState(remote: SpotifyAppRemote, onPlayerEvent: (PlayerStateData) -> Unit)
-    suspend fun subscribeToPlayerState()
+    val playerState: StateFlow<PlayerState>
+    suspend fun subscribeToPlayerState(function: (PlayerStateData) -> Unit)
     suspend fun play(trackUri: String)
     suspend fun pause(): Result<Unit>
     suspend fun resume(): Result<Unit>

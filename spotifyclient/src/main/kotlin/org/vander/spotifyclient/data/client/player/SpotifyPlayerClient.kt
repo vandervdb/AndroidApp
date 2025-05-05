@@ -1,29 +1,34 @@
 package org.vander.spotifyclient.data.client.player
 
 import android.util.Log
-import com.spotify.android.appremote.api.SpotifyAppRemote
+import com.spotify.android.appremote.api.PlayerApi
 import com.spotify.protocol.types.Track
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import org.vander.spotifyclient.data.client.player.domain.ISpotifyPlayerClient
+import org.vander.spotifyclient.data.client.remote.ISpotifyAppRemoteProvider
 import org.vander.spotifyclient.data.mapper.toPlayerStateData
+import org.vander.spotifyclient.domain.state.PlayerState
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import javax.inject.Inject
 
-class SpotifyPlayerClient @Inject constructor() : ISpotifyPlayerClient {
+class SpotifyPlayerClient @Inject constructor(
+    private val appRemoteProvider: ISpotifyAppRemoteProvider
+) : ISpotifyPlayerClient {
 
     companion object {
         const val TAG = "SpotifyPlayerClient"
     }
 
-    private var spotifyAppRemote: SpotifyAppRemote? = null
-    private lateinit var onPlayerEvent: (PlayerStateData) -> Unit
+    private val playerApi: PlayerApi?
+        get() = appRemoteProvider.get()?.playerApi
+    private val _playerState = MutableStateFlow<PlayerState>(PlayerState.NotConnected)
+    override val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
 
-    override fun registerAppRemotePlayerState(remote: SpotifyAppRemote, onPlayerEvent: (PlayerStateData) -> Unit) {
-        this.spotifyAppRemote = remote
-        this.onPlayerEvent = onPlayerEvent
-    }
-
-    override suspend fun subscribeToPlayerState() {
-        spotifyAppRemote?.let {
-            it.playerApi.subscribeToPlayerState().setEventCallback {
+    override suspend fun subscribeToPlayerState(function: (PlayerStateData) -> Unit) {
+        playerApi?.let {
+            it.subscribeToPlayerState().setEventCallback {
                 val track: Track = it.track
                 Log.d(
                     TAG,
@@ -31,14 +36,17 @@ class SpotifyPlayerClient @Inject constructor() : ISpotifyPlayerClient {
                 )
                 val playerStateData = it.toPlayerStateData()
                 Log.d(TAG, "Player state: $playerStateData")
-                onPlayerEvent(playerStateData)
+                function(playerStateData)
             }
+        } ?: run {
+            Log.e(TAG, "spotifyPlayerApi is null")
+            _playerState.value = PlayerState.NotConnected
         }
     }
 
     override suspend fun play(trackUri: String) {
         Log.d(TAG, "play: ")
-        spotifyAppRemote?.playerApi?.play(trackUri)
+        playerApi?.play(trackUri)
     }
 
     override suspend fun pause(): Result<Unit> {

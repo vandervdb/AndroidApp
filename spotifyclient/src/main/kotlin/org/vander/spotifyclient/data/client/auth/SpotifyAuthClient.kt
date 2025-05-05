@@ -31,7 +31,10 @@ class SpotifyAuthClient @Inject constructor() : ISpotifyAuthClient {
         launcher.launch(intent)
     }
 
-    override fun handleSpotifyAuthResult(result: ActivityResult, onResult: (Result<String>) -> Unit) {
+    override fun handleSpotifyAuthResult(
+        result: ActivityResult,
+        onResult: (Result<String>) -> Unit
+    ) {
         Log.d(TAG, "handleSpotifyAuthResult: $result")
 
         return if (result.resultCode == Activity.RESULT_OK) {

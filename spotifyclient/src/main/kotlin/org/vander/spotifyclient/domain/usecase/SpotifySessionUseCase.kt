@@ -3,6 +3,7 @@ package org.vander.spotifyclient.domain.usecase
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import kotlinx.coroutines.CoroutineScope
@@ -12,15 +13,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.vander.spotifyclient.data.client.auth.ISpotifyAuthClient
-import org.vander.spotifyclient.data.client.remote.ISpotifyRemoteClient
+import org.vander.spotifyclient.data.client.remote.ISpotifyAppRemoteProvider
 import org.vander.spotifyclient.domain.error.SpotifySessionError
 import org.vander.spotifyclient.domain.state.SpotifySessionState
 import javax.inject.Inject
 
 class SpotifySessionUseCase @Inject constructor(
     private val authClient: ISpotifyAuthClient,
-    private val remoteClient: ISpotifyRemoteClient
+    private val remoteProvider: ISpotifyAppRemoteProvider
 ) {
+    companion object {
+        private const val TAG = "SpotifySessionUseCase"
+    }
+
     val dispatcher = Dispatchers.Main
 
     private val _sessionState = MutableStateFlow<SpotifySessionState>(SpotifySessionState.Idle)
@@ -55,6 +60,7 @@ class SpotifySessionUseCase @Inject constructor(
         authClient.handleSpotifyAuthResult(result) { authResult ->
             if (authResult.isSuccess) {
                 coroutineScope.launch {
+                    Log.d(TAG, "Connecting to remote...")
                     connectRemote(context, coroutineScope)
                 }
             } else {
@@ -66,7 +72,7 @@ class SpotifySessionUseCase @Inject constructor(
     }
 
     fun disconnect() {
-        remoteClient.disconnect()
+        remoteProvider.disconnect()
         _sessionState.value = SpotifySessionState.Idle
     }
 
@@ -76,10 +82,11 @@ class SpotifySessionUseCase @Inject constructor(
     ) {
         _sessionState.value = SpotifySessionState.ConnectingRemote
         coroutineScope.launch(dispatcher) {
-            val result = remoteClient.connect(context)
+            val result = remoteProvider.connect(context)
             if (result.isSuccess) {
                 _sessionState.value = SpotifySessionState.Ready
             } else {
+                Log.e(TAG, "Failed to connect to remote", result.exceptionOrNull())
                 _sessionState.value = SpotifySessionState.Failed(
                     SpotifySessionError.RemoteConnectionFailed(result.exceptionOrNull())
                 )

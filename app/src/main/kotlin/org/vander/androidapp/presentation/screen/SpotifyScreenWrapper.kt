@@ -13,7 +13,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import org.vander.androidapp.presentation.components.MiniPlayer
 import org.vander.androidapp.presentation.viewmodel.SpotifyViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
