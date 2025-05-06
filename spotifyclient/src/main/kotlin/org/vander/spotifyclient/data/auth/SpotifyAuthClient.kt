@@ -1,4 +1,4 @@
-package org.vander.spotifyclient.data.client.auth
+package org.vander.spotifyclient.data.auth
 
 import android.app.Activity
 import android.content.Intent
@@ -9,8 +9,9 @@ import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationClient.createLoginActivityIntent
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
-import org.vander.spotify.data.utils.CLIENT_ID
-import org.vander.spotify.data.utils.REDIRECT_URI
+import org.vander.spotifyclient.BuildConfig
+import org.vander.spotifyclient.domain.auth.ISpotifyAuthClient
+import org.vander.spotifyclient.utils.REDIRECT_URI
 import javax.inject.Inject
 
 class SpotifyAuthClient @Inject constructor() : ISpotifyAuthClient {
@@ -20,7 +21,7 @@ class SpotifyAuthClient @Inject constructor() : ISpotifyAuthClient {
 
     override fun authorize(contextActivity: Activity, launcher: ActivityResultLauncher<Intent>) {
         val request = AuthorizationRequest.Builder(
-            CLIENT_ID,
+            BuildConfig.CLIENT_ID,
             AuthorizationResponse.Type.CODE,
             REDIRECT_URI
         ).apply {
@@ -42,9 +43,9 @@ class SpotifyAuthClient @Inject constructor() : ISpotifyAuthClient {
             if (data == null) {
                 Log.e(TAG, "Aucune donnée reçue dans le résultat d'activité")
                 onResult(Result.failure<String>(Exception("Aucune donnée reçue")))
-
             }
-            Log.d(TAG, "Résultat OK: $data")
+            val token = data?.getStringExtra("token")
+            Log.d(TAG, "Résultat OK")
             val response = AuthorizationClient.getResponse(result.resultCode, data)
             when (response.type) {
                 AuthorizationResponse.Type.CODE -> {
@@ -62,6 +63,5 @@ class SpotifyAuthClient @Inject constructor() : ISpotifyAuthClient {
             onResult(Result.failure<String>(Exception(result.resultCode.toString())))
         }
     }
-
 }
 

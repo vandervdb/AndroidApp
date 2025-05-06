@@ -1,4 +1,4 @@
-package org.vander.spotifyclient.data.client.remote
+package org.vander.spotifyclient.data.appremote
 
 import android.content.Context
 import android.util.Log
@@ -9,8 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.vander.spotify.data.utils.CLIENT_ID
-import org.vander.spotify.data.utils.REDIRECT_URI
+import org.vander.spotifyclient.BuildConfig
+import org.vander.spotifyclient.domain.appremote.ISpotifyAppRemoteProvider
+import org.vander.spotifyclient.utils.REDIRECT_URI
 import org.vander.spotifyclient.domain.state.SpotifyRemoteClientState
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,7 +33,7 @@ class SpotifyAppRemoteProvider @Inject constructor() : ISpotifyAppRemoteProvider
         _remoteState.value = SpotifyRemoteClientState.Connecting
 
         return suspendCancellableCoroutine { continuation ->
-            val connectionParams = ConnectionParams.Builder(CLIENT_ID)
+            val connectionParams = ConnectionParams.Builder(BuildConfig.CLIENT_ID)
                 .setRedirectUri(REDIRECT_URI)
                 .showAuthView(false)
                 .build()

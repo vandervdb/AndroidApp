@@ -1,4 +1,4 @@
-package org.vander.spotifyclient.data.client.player.domain
+package org.vander.spotifyclient.domain.player.repository
 
 import kotlinx.coroutines.flow.StateFlow
 import org.vander.spotifyclient.domain.state.PlayerStateData

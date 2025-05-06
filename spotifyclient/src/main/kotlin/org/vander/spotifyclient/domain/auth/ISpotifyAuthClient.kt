@@ -1,4 +1,4 @@
-package org.vander.spotifyclient.data.client.auth
+package org.vander.spotifyclient.domain.auth
 
 import android.app.Activity
 import android.content.Intent

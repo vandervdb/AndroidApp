@@ -10,7 +10,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.vander.spotifyclient.data.client.player.domain.IPlayerStateRepository
+import org.vander.spotifyclient.domain.player.repository.IPlayerStateRepository
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import org.vander.spotifyclient.domain.state.SpotifySessionState
 import org.vander.spotifyclient.domain.usecase.SpotifyPlayerRemoteUseCase

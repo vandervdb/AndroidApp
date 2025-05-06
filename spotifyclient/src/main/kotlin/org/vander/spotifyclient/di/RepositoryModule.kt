@@ -5,8 +5,8 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.scopes.ViewModelScoped
-import org.vander.spotifyclient.data.client.player.data.DefaultPlayerStateRepository
-import org.vander.spotifyclient.data.client.player.domain.IPlayerStateRepository
+import org.vander.spotifyclient.data.repository.DefaultPlayerStateRepository
+import org.vander.spotifyclient.domain.player.repository.IPlayerStateRepository
 
 @Module
 @InstallIn(ViewModelComponent::class)

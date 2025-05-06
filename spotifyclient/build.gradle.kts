@@ -16,6 +16,11 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+        val spotifyClientSecret = gradle.extra["spotifyClientSecret"] as String
+        val spotifyClientId = gradle.extra["spotifyClientId"] as String
+        buildConfigField("String", "CLIENT_SECRET", "\"$spotifyClientSecret\"")
+        buildConfigField("String", "CLIENT_ID", "\"$spotifyClientId\"")
+
     }
 
     buildTypes {
@@ -34,6 +39,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     kotlinOptions {
@@ -72,6 +78,8 @@ dependencies {
     implementation(files("libs/spotify-app-remote-release-0.8.0.aar"))
     implementation(files("libs/spotify-auth-release-2.1.0.aar"))
     implementation(libs.androidx.browser)
+
+    implementation(libs.datastore.preferences)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

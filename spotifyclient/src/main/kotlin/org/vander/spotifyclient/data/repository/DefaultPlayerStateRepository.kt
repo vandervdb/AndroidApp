@@ -1,11 +1,11 @@
-package org.vander.spotifyclient.data.client.player.data
+package org.vander.spotifyclient.data.repository
 
 import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.vander.spotifyclient.data.client.player.domain.IPlayerStateRepository
-import org.vander.spotifyclient.data.client.player.domain.ISpotifyPlayerClient
+import org.vander.spotifyclient.domain.player.repository.IPlayerStateRepository
+import org.vander.spotifyclient.domain.player.ISpotifyPlayerClient
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import javax.inject.Inject
 
@@ -17,7 +17,7 @@ class DefaultPlayerStateRepository @Inject constructor(
         private const val TAG = "DefaultPlayerStateRepository"
     }
 
-    private val _playerStateData = MutableStateFlow(PlayerStateData.empty())
+    private val _playerStateData = MutableStateFlow(PlayerStateData.Companion.empty())
     override val playerStateData: StateFlow<PlayerStateData> = _playerStateData.asStateFlow()
 
     private var isListening = false

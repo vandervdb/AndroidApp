@@ -1,15 +1,14 @@
-package org.vander.spotifyclient.data.client.player
+package org.vander.spotifyclient.data.player
 
 import android.util.Log
 import com.spotify.android.appremote.api.PlayerApi
-import com.spotify.protocol.types.PlayerState
 import com.spotify.protocol.types.Track
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.vander.spotifyclient.data.client.player.domain.ISpotifyPlayerClient
-import org.vander.spotifyclient.data.client.remote.ISpotifyAppRemoteProvider
-import org.vander.spotifyclient.data.mapper.toPlayerStateData
+import org.vander.spotifyclient.domain.player.ISpotifyPlayerClient
+import org.vander.spotifyclient.domain.appremote.ISpotifyAppRemoteProvider
+import org.vander.spotifyclient.data.player.mapper.toPlayerStateData
 import org.vander.spotifyclient.domain.state.PlayerConnectionState
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import javax.inject.Inject

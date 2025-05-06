@@ -1,4 +1,4 @@
-package org.vander.spotifyclient.data.mapper
+package org.vander.spotifyclient.data.player.mapper
 
 import android.util.Log
 import com.spotify.protocol.types.PlayerState

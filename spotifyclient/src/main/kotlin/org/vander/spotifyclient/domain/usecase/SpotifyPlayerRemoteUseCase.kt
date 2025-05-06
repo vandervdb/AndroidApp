@@ -4,9 +4,9 @@ import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.vander.spotifyclient.data.client.player.domain.IPlayerStateRepository
-import org.vander.spotifyclient.data.client.player.domain.ISpotifyPlayerClient
-import org.vander.spotifyclient.data.client.remote.ISpotifyAppRemoteProvider
+import org.vander.spotifyclient.domain.player.repository.IPlayerStateRepository
+import org.vander.spotifyclient.domain.player.ISpotifyPlayerClient
+import org.vander.spotifyclient.domain.appremote.ISpotifyAppRemoteProvider
 import org.vander.spotifyclient.domain.state.SpotifyRemoteClientState
 import javax.inject.Inject
 

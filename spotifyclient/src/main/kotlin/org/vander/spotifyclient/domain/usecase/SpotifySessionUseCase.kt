@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.vander.spotifyclient.data.client.auth.ISpotifyAuthClient
-import org.vander.spotifyclient.data.client.remote.ISpotifyAppRemoteProvider
+import org.vander.spotifyclient.domain.auth.ISpotifyAuthClient
+import org.vander.spotifyclient.domain.appremote.ISpotifyAppRemoteProvider
 import org.vander.spotifyclient.domain.error.SpotifySessionError
 import org.vander.spotifyclient.domain.state.SpotifySessionState
 import javax.inject.Inject

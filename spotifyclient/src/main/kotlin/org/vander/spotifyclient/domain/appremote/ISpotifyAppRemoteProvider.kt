@@ -1,4 +1,4 @@
-package org.vander.spotifyclient.data.client.remote
+package org.vander.spotifyclient.domain.appremote
 
 import android.content.Context
 import com.spotify.android.appremote.api.SpotifyAppRemote
