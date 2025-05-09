@@ -12,15 +12,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.vander.spotifyclient.domain.auth.ISpotifyAuthClient
 import org.vander.spotifyclient.domain.appremote.ISpotifyAppRemoteProvider
+import org.vander.spotifyclient.domain.auth.IAuthRepository
+import org.vander.spotifyclient.domain.auth.ISpotifyAuthClient
 import org.vander.spotifyclient.domain.error.SpotifySessionError
 import org.vander.spotifyclient.domain.state.SpotifySessionState
 import javax.inject.Inject
 
 class SpotifySessionUseCase @Inject constructor(
     private val authClient: ISpotifyAuthClient,
-    private val remoteProvider: ISpotifyAppRemoteProvider
+    private val remoteProvider: ISpotifyAppRemoteProvider,
+    private val authRepository: IAuthRepository
 ) {
     companion object {
         private const val TAG = "SpotifySessionUseCase"
@@ -60,6 +62,9 @@ class SpotifySessionUseCase @Inject constructor(
         authClient.handleSpotifyAuthResult(result) { authResult ->
             if (authResult.isSuccess) {
                 coroutineScope.launch {
+                    val authCode = authResult.getOrElse { "" }
+                    Log.d(TAG, "Launching auth token request...")
+                    fetchAndStoreAuthToken(authCode)
                     Log.d(TAG, "Connecting to remote...")
                     connectRemote(context, coroutineScope)
                 }
@@ -92,5 +97,9 @@ class SpotifySessionUseCase @Inject constructor(
                 )
             }
         }
+    }
+
+    private suspend fun  fetchAndStoreAuthToken(authCode: String) {
+        authRepository.getAccessToken(authCode)
     }
 }

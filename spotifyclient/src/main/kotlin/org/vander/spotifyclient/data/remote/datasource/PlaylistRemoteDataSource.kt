@@ -8,15 +8,16 @@ import io.ktor.http.HttpHeaders
 import org.vander.spotifyclient.data.playlist.dto.SpotifyPlaylistsResponseDto
 import org.vander.spotifyclient.domain.datasource.IPlaylistRemoteDataSource
 import javax.inject.Inject
+import javax.inject.Named
 
 class PlaylistRemoteDataSource @Inject constructor(
-    private val httpClient: HttpClient
+    @Named("PlaylistHttpClient") private val httpClient: HttpClient
 ) : IPlaylistRemoteDataSource {
 
     override suspend fun fetchUserPlaylists(token: String): Result<SpotifyPlaylistsResponseDto> {
         return try {
             val response: SpotifyPlaylistsResponseDto =
-                httpClient.get("https://api.spotify.com/v1/me/playlists") {
+                httpClient.get("playlists") {
                     headers {
                         append(HttpHeaders.Authorization, "Bearer $token")
                     }

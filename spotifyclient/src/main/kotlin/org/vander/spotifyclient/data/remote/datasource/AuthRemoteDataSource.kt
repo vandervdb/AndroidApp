@@ -1,33 +1,51 @@
 package org.vander.spotifyclient.data.remote.datasource
 
 
-import org.vander.spotifyclient.BuildConfig
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.forms.*
-import io.ktor.http.*
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.forms.submitForm
+import io.ktor.client.request.headers
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.Parameters
+import org.vander.spotifyclient.BuildConfig.CLIENT_ID
+import org.vander.spotifyclient.BuildConfig.CLIENT_SECRET
 import org.vander.spotifyclient.data.remote.dto.SpotifyTokenResponseDto
-import org.vander.spotifyclient.utils.*
+import org.vander.spotifyclient.domain.auth.IAuthRemoteDatasource
 import javax.inject.Inject
+import javax.inject.Named
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 class AuthRemoteDataSource @Inject constructor(
-    private val httpClient: HttpClient
-) {
-    suspend fun fetchAccessToken(code: String): Result<SpotifyTokenResponseDto> {
+    @Named("AuthHttpClient") val httpClient: HttpClient
+) : IAuthRemoteDatasource {
+    @OptIn(ExperimentalEncodingApi::class)
+    @RequiresApi(Build.VERSION_CODES.O)
+    override suspend fun fetchAccessToken(code: String): Result<SpotifyTokenResponseDto> {
         return try {
-            val response = httpClient.submitForm(
-                url = "https://accounts.spotify.com/api/token",
-                formParameters = Parameters.build {
-                    append("grant_type", "authorization_code")
-                    append("code", code)
-                    append("redirect_uri", REDIRECT_URI)
-                    append("client_id", BuildConfig.CLIENT_ID)
-                    append("client_secret", BuildConfig.CLIENT_SECRET)
-                }
-            ).body<SpotifyTokenResponseDto>()
+            Log.d("AuthRemoteDataSource", "Fetching token with code: $code")
+            val credentials = "$CLIENT_ID:$CLIENT_SECRET"
+            val encodedCredentials = kotlin.io.encoding.Base64.encode(credentials.toByteArray())
 
-            Result.success(response)
+            val response = httpClient.submitForm(
+                url = "token",
+                formParameters = Parameters.build {
+                    append("grant_type", "client_credentials")
+                }
+            ) {
+                headers {
+                    append("Authorization", "Basic $encodedCredentials")
+                }
+            }
+
+            val rawBody = response.bodyAsText()
+            Log.d("AuthRemoteDataSource", "Raw body: $rawBody")
+            val responseDto = response.body<SpotifyTokenResponseDto>()
+            Result.success(responseDto)
         } catch (e: Exception) {
+            Log.e("AuthRemoteDataSource", "Error fetching token", e)
             Result.failure(e)
         }
     }

@@ -73,7 +73,6 @@ fun MiniPlayer(viewModel: SpotifyViewModel) {
                 IconButton(
                     onClick = { viewModel.togglePlayPause() }
                 ) {
-                    Log.d("momo", "isPaused: ${playerState.isPaused}")
                     Icon(
                         imageVector = if (playerState.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
                         contentDescription = if (viewModel.isPlaying()) "Pause" else "Play"

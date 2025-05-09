@@ -1,5 +1,6 @@
 package org.vander.spotifyclient.di
 
+import android.util.Log
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -8,12 +9,15 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.header
-import io.ktor.http.HttpHeaders
+import io.ktor.client.plugins.logging.DEFAULT
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import org.vander.spotifyclient.domain.auth.ITokenProvider
+import org.vander.spotifyclient.network.AuthHeaderPlugin
+import org.vander.spotifyclient.network.KtorClientConfig
 import javax.inject.Singleton
-import org.vander.spotifyclient.utils.HTTPS_API_SPOTIFY_COM_V_1
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -21,7 +25,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideKtorClient(): HttpClient {
+    fun provideKtorClient(
+        tokenProvider: ITokenProvider,
+        config: KtorClientConfig
+    ): HttpClient {
         return HttpClient(OkHttp) {
             install(ContentNegotiation) {
                 json(Json {
@@ -30,9 +37,25 @@ object NetworkModule {
                     isLenient = true
                 })
             }
+
+            if (config.enableAuthPlugin) {
+                install(AuthHeaderPlugin) {
+                    this.tokenProvider = tokenProvider
+                }
+            }
+
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        Log.d("KtorLogger", message)
+                    }
+                }
+                Log.d("KtorLogger", "Ktor logger installed")
+                level = config.logLevel
+            }
+
             defaultRequest {
-                url(HTTPS_API_SPOTIFY_COM_V_1)
-                header(HttpHeaders.Authorization, "Bearer <ACCESS_TOKEN>")
+                url(config.baseUrl)
             }
         }
     }

@@ -52,7 +52,6 @@ class SpotifyAuthClient @Inject constructor() : ISpotifyAuthClient {
                     Log.d(TAG, "Code d'autorisation reçu: ${response.code}")
                     onResult(Result.success(response.code))
                 }
-
                 else -> {
                     Log.e(TAG, "Erreur dans la réponse: ${response.error}")
                     onResult(Result.failure<String>(Exception(response.error)))
