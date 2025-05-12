@@ -19,13 +19,14 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.vander.androidapp.presentation.components.MiniPlayer
 import org.vander.androidapp.presentation.viewmodel.SpotifyViewModel
+import org.vander.coreui.IMiniPlayerViewModel
 import org.vander.spotifyclient.domain.state.SpotifySessionState
 
 
 @Composable
 fun SpotifyScreen(
     navController: NavController,
-    viewModel: SpotifyViewModel,
+    viewModel: IMiniPlayerViewModel,
     launcher: ActivityResultLauncher<Intent>,
     activity: Activity?,
     modifier: Modifier

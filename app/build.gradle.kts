@@ -2,9 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
-    kotlin("kapt")
-    kotlin("plugin.serialization") version "2.0.21"
+    id("kotlin-kapt")
 }
 
 android {
@@ -47,38 +47,43 @@ android {
 }
 
 dependencies {
-
+    // Modules internes
     implementation(project(":spotifyclient"))
+    implementation(project(":spotify_fake"))
+    implementation(project(":core_ui"))
 
-    implementation(libs.hilt.android)
-    implementation(libs.hilt.navigation.compose)
-    kapt(libs.hilt.android.compiler)
+    // AndroidX - Core & Lifecycle
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.activity.compose)
+
+    // Compose
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.material3)
-    implementation(libs.androidx.material3.window.size.class1)
-    implementation(libs.androidx.material3.adaptive.navigation.suite)
     implementation(libs.androidx.material.icons.extended)
+
+    // Material3 & responsive
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.material3.window.size)
+    implementation(libs.androidx.material3.adaptive.navigation.suite)
+
+    // Coil (images)
     implementation(libs.coil.compose)
 
-
+    // Gson
     implementation(libs.gson)
 
+    // Hilt
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
-    kapt("com.google.dagger:hilt-compiler:2.48.1")
+    kapt(libs.hilt.android.compiler)
+    kapt(libs.androidx.hilt.compiler) // pour @HiltViewModel uniquement
+    implementation(libs.hilt.navigation.compose)
 
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    kapt("androidx.hilt:hilt-compiler:1.1.0")
-
+    // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

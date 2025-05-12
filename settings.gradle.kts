@@ -1,5 +1,11 @@
 import java.util.Properties
 
+include(":core_ui")
+
+
+include(":spotify_fake")
+
+
 pluginManagement {
     repositories {
         google {
@@ -26,6 +32,8 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 rootProject.name = "AndroidApp"
 include(":app")
 include(":spotifyclient")
+include(":spotify_fake")
+include(":core_ui")
 
 
 // Load credentials from spotify-secret.properties

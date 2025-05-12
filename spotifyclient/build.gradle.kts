@@ -2,9 +2,9 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("kotlin-kapt")
-    id("dagger.hilt.android.plugin")
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.hilt)
+    id("kotlin-kapt")
 }
 
 android {
@@ -48,46 +48,55 @@ android {
 }
 
 dependencies {
-    implementation(libs.hilt.android)
-    implementation(libs.hilt.navigation.compose)
-    kapt(libs.hilt.android.compiler)
+    // Kotlin & Lifecycle
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.activity.compose)
+
+    // Jetpack Compose
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
 
+    // Material 3 & adaptive
     implementation(libs.androidx.material3)
-    implementation(libs.material3)
-    implementation(libs.androidx.material3.window.size.class1)
+    implementation(libs.androidx.material3.window.size)
     implementation(libs.androidx.material3.adaptive.navigation.suite)
 
-    implementation(libs.gson)
-
+    // Hilt (Dagger)
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
-    kapt("com.google.dagger:hilt-compiler:2.48.1")
+    kapt(libs.hilt.android.compiler)
+    kapt(libs.androidx.hilt.compiler) // requis pour @HiltViewModel
+    implementation(libs.hilt.navigation.compose)
 
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    kapt("androidx.hilt:hilt-compiler:1.1.0")
-
+    // Spotify SDK
     implementation(files("libs/spotify-app-remote-release-0.8.0.aar"))
     implementation(files("libs/spotify-auth-release-2.1.0.aar"))
+
+    // AndroidX utils
     implementation(libs.androidx.browser)
 
+    // Ktor
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.logging)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.ktor.client.logging)
 
+    // DataStore
     implementation(libs.datastore.preferences)
 
+    // Gson
+    implementation(libs.gson)
+
+    // Coil (images)
+    implementation(libs.coil.compose)
+
+    // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -95,6 +104,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-
 }

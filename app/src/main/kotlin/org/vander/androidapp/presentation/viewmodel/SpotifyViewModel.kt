@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.vander.coreui.IMiniPlayerViewModel
 import org.vander.spotifyclient.domain.player.repository.IPlayerStateRepository
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import org.vander.spotifyclient.domain.state.SpotifySessionState
@@ -18,21 +19,21 @@ import org.vander.spotifyclient.domain.usecase.SpotifySessionUseCase
 import javax.inject.Inject
 
 @HiltViewModel
-class SpotifyViewModel @Inject constructor(
+open class SpotifyViewModel @Inject constructor(
     private val sessionUseCase: SpotifySessionUseCase,
     private val playerUseCase: SpotifyPlayerRemoteUseCase,
     private val playerRepository: IPlayerStateRepository
-) : ViewModel() {
+) : ViewModel(), IMiniPlayerViewModel {
 
-    val sessionState: StateFlow<SpotifySessionState> = sessionUseCase.sessionState
-    val playerStateData: StateFlow<PlayerStateData> = playerRepository.playerStateData
+    override val sessionState: StateFlow<SpotifySessionState> = sessionUseCase.sessionState
+    override val playerStateData: StateFlow<PlayerStateData> = playerRepository.playerStateData
 
 
-    fun requestAuthorization(launcher: ActivityResultLauncher<Intent>) {
+    override fun requestAuthorization(launcher: ActivityResultLauncher<Intent>) {
         sessionUseCase.requestAuthorization(launcher)
     }
 
-    fun launchAuthorizationFlow(activity: Activity) {
+    override fun launchAuthorizationFlow(activity: Activity) {
         sessionUseCase.launchAuthorizationFlow(activity)
     }
 
@@ -53,7 +54,7 @@ class SpotifyViewModel @Inject constructor(
         }
     }
 
-    fun togglePlayPause() {
+     override fun togglePlayPause() {
         viewModelScope.launch {
             playerUseCase.togglePlayPause()
         }
@@ -64,7 +65,7 @@ class SpotifyViewModel @Inject constructor(
     }
 
 
-    fun isPlaying(): Boolean {
+    override fun isPlaying(): Boolean {
         return true
     }
 
