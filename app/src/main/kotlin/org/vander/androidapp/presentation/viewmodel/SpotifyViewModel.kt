@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.vander.coreui.IMiniPlayerViewModel
+import org.vander.spotifyclient.domain.data.CurrentlyPlayingAndQueue
 import org.vander.spotifyclient.domain.data.SpotifyPlaylistsResponse
 import org.vander.spotifyclient.domain.player.repository.IPlayerStateRepository
 import org.vander.spotifyclient.domain.state.PlayerStateData
@@ -36,12 +37,16 @@ open class SpotifyViewModel @Inject constructor(
     private val _playlists = MutableStateFlow<Result<SpotifyPlaylistsResponse>?>(null)
     val playlists: StateFlow<Result<SpotifyPlaylistsResponse>?> = _playlists
 
+    private val _queue = MutableStateFlow<Result<CurrentlyPlayingAndQueue>?>(null)
+    val queue: StateFlow<Result<CurrentlyPlayingAndQueue>?> = _queue
+
     companion object {
         private const val TAG = "SpotifyViewModel"
     }
 
     init {
         observeUserPlaylists()
+        observeUserQueue()
     }
 
     override fun requestAuthorization(launcher: ActivityResultLauncher<Intent>) {
@@ -101,6 +106,16 @@ open class SpotifyViewModel @Inject constructor(
                 .collect { result ->
                     Log.d(TAG, "Received playlists: $result")
                     _playlists.value = result
+                }
+        }
+    }
+
+    private fun observeUserQueue() {
+        viewModelScope.launch {
+            playlistUseCase.observeUserQueueWhenTokenAvailable()
+                .collect { result ->
+                    Log.d(TAG, "Received queue: $result")
+                    _queue.value = result
                 }
         }
     }

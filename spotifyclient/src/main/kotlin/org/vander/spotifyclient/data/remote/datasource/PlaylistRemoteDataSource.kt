@@ -8,6 +8,7 @@ import io.ktor.http.HttpHeaders
 import kotlinx.serialization.json.Json
 import org.vander.spotifyclient.data.playlist.dto.SpotifyPlaylistDto
 import org.vander.spotifyclient.data.playlist.dto.SpotifyPlaylistsResponseDto
+import org.vander.spotifyclient.data.remote.dto.CurrentlyPlayingWithQueueDto
 import org.vander.spotifyclient.domain.auth.ITokenProvider
 import org.vander.spotifyclient.domain.datasource.IPlaylistRemoteDataSource
 import org.vander.spotifyclient.utils.parseSpotifyResult
@@ -19,6 +20,22 @@ class PlaylistRemoteDataSource @Inject constructor(
     private val tokenProvider: ITokenProvider
 ) : IPlaylistRemoteDataSource {
 
+    override suspend fun fetchUserQueue(): Result<CurrentlyPlayingWithQueueDto> {
+        return try {
+            val token = getAccessToken()
+            val response = httpClient.get("player/queue") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $token")
+                }
+            }
+            val rawBody = response.bodyAsText()
+            val json = Json { ignoreUnknownKeys = true }
+
+            return response.parseSpotifyResult<CurrentlyPlayingWithQueueDto>("PlaylistRemoteDataSource")
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     override suspend fun fetchUserPlaylists(): Result<SpotifyPlaylistsResponseDto> {
         return try {
