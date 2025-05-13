@@ -12,6 +12,7 @@ import com.spotify.sdk.android.auth.AuthorizationResponse
 import org.vander.spotifyclient.BuildConfig
 import org.vander.spotifyclient.domain.auth.ISpotifyAuthClient
 import org.vander.spotifyclient.utils.REDIRECT_URI
+import org.vander.spotifyclient.utils.USER_READ_PRIVATE
 import javax.inject.Inject
 
 class SpotifyAuthClient @Inject constructor() : ISpotifyAuthClient {
@@ -23,13 +24,14 @@ class SpotifyAuthClient @Inject constructor() : ISpotifyAuthClient {
         val request = AuthorizationRequest.Builder(
             BuildConfig.CLIENT_ID,
             AuthorizationResponse.Type.CODE,
-            REDIRECT_URI
+            REDIRECT_URI,
         ).apply {
-            setScopes(arrayOf("streaming"))
+            setScopes(arrayOf("streaming", USER_READ_PRIVATE))
+            setShowDialog(true)
         }.build()
-
         val intent = createLoginActivityIntent(contextActivity, request)
         launcher.launch(intent)
+
     }
 
     override fun handleSpotifyAuthResult(

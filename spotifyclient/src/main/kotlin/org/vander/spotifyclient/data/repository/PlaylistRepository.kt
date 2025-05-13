@@ -16,7 +16,7 @@ class PlaylistRepository @Inject constructor(
     private val remoteDataSource: IPlaylistRemoteDataSource
 ) : IPlaylistRepository {
 
-    override suspend fun getUserPlaylists(token: String): Result<SpotifyPlaylistsResponse> {
-        return remoteDataSource.fetchUserPlaylists(token).map { it.toDomain() }
+    override suspend fun getUserPlaylists(): Result<SpotifyPlaylistsResponse> {
+        return remoteDataSource.fetchUserPlaylists().map { it.toDomain() }
     }
 }

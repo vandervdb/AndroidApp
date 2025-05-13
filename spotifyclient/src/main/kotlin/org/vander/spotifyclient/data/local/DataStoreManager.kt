@@ -1,6 +1,7 @@
 package org.vander.spotifyclient.data.local
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -19,6 +20,7 @@ class DataStoreManager @Inject constructor(
 ): IDataStoreManager {
 
     companion object {
+        private const val TAG = "DataStoreManager"
         private const val DATASTORE_NAME = "spotify_prefs"
         private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
     }
@@ -30,12 +32,14 @@ class DataStoreManager @Inject constructor(
 
     override suspend fun saveAccessToken(token: String) {
         context.dataStore.edit { preferences ->
+            Log.d(TAG, "Saving access token: $token")
             preferences[ACCESS_TOKEN_KEY] = token
         }
     }
 
     override suspend fun clearAccessToken() {
         context.dataStore.edit { preferences ->
+            Log.d(TAG, "Clearing access token")
             preferences.remove(ACCESS_TOKEN_KEY)
         }
     }

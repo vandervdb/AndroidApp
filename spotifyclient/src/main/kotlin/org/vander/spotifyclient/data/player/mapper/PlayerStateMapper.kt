@@ -6,7 +6,6 @@ import org.vander.spotifyclient.domain.state.PlayerStateData
 
 fun PlayerState.toPlayerStateData(): PlayerStateData {
     val track = this.track
-    Log.d("momo", "track: ${track.imageUri.toString().extractSpotifyTrackIdOrNull()}")
     return PlayerStateData(
         trackName = track?.name ?: "Unknown Track",
         artistName = track?.artist?.name ?: "Unknown Artist",

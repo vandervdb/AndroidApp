@@ -14,4 +14,5 @@ interface IMiniPlayerViewModel {
     fun launchAuthorizationFlow(activity: Activity)
     fun togglePlayPause()
     fun isPlaying(): Boolean
+    fun disconnectSpotify()
 }

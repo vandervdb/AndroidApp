@@ -16,9 +16,9 @@ class AutRepository @Inject constructor(
         private const val TAG = "AuthRepository"
     }
 
-    override suspend fun getAccessToken(code: String): Result<String> {
-        return authRemoteDataSource.fetchAccessToken(code)
-            .onSuccess { dataStoreManager.saveAccessToken(it.accessToken) }
+    override suspend fun getAccessToken(authCode: String): Result<String> {
+        return authRemoteDataSource.fetchAccessToken(authCode)
+            .onSuccess { storeAccessToken(it.accessToken) }
             .onFailure {
                 Log.e(
                     "AuthRepository",
@@ -30,7 +30,11 @@ class AutRepository @Inject constructor(
     }
 
     override suspend fun storeAccessToken(token: String) {
-        TODO("Not yet implemented")
+        dataStoreManager.saveAccessToken(token)
+    }
+
+    override suspend fun clearAccessToken() {
+        dataStoreManager.clearAccessToken()
     }
 
 }

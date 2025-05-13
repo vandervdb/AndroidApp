@@ -3,7 +3,7 @@ package org.vander.spotifyclient.domain.state
 data class PlayerStateData(
     val trackName: String,
     val artistName: String,
-    val trackId: String,
+    val trackId: String?,
     val isPaused: Boolean,
     val playing: Boolean,
     val paused: Boolean,
@@ -19,7 +19,7 @@ data class PlayerStateData(
             return PlayerStateData(
                 trackName = "",
                 artistName = "",
-                trackId = "",
+                trackId = null,
                 isPaused = true,
                 playing = false,
                 paused = true,

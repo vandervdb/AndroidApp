@@ -13,9 +13,9 @@ class FakeMiniPlayerViewModel : IMiniPlayerViewModel {
     override val sessionState = MutableStateFlow<SpotifySessionState>(SpotifySessionState.Ready)
     override val playerStateData = MutableStateFlow<PlayerStateData>(
         PlayerStateData(
-            trackId = "fake_track_id",
             trackName = "Zelda's Theme",
             artistName = "Koji Kondo",
+            trackId = null,
             isPaused = true,
             playing = false,
             paused = true,
@@ -40,6 +40,10 @@ class FakeMiniPlayerViewModel : IMiniPlayerViewModel {
     }
 
     override fun launchAuthorizationFlow(activity: Activity) {
+        // Nothing to do
+    }
+
+    override fun disconnectSpotify() {
         // Nothing to do
     }
 }

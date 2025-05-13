@@ -17,8 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import org.vander.androidapp.presentation.components.LifecycleObserverComponent
 import org.vander.androidapp.presentation.components.MiniPlayer
-import org.vander.androidapp.presentation.viewmodel.SpotifyViewModel
 import org.vander.coreui.IMiniPlayerViewModel
 import org.vander.spotifyclient.domain.state.SpotifySessionState
 
@@ -31,6 +31,8 @@ fun SpotifyScreen(
     activity: Activity?,
     modifier: Modifier
 ) {
+
+    val tag = "SpotifyScreen"
     val sessionState by viewModel.sessionState.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -38,6 +40,7 @@ fun SpotifyScreen(
         viewModel.launchAuthorizationFlow(activity!!)
     }
 
+    LifecycleObserverComponent(tag, onStopCallback = viewModel::disconnectSpotify)
 
     Box(
         modifier = modifier.padding(32.dp),

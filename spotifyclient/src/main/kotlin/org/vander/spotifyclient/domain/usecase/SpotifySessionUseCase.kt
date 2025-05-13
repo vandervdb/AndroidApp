@@ -3,9 +3,11 @@ package org.vander.spotifyclient.domain.usecase
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import com.spotify.sdk.android.auth.AuthorizationClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +19,7 @@ import org.vander.spotifyclient.domain.auth.IAuthRepository
 import org.vander.spotifyclient.domain.auth.ISpotifyAuthClient
 import org.vander.spotifyclient.domain.error.SpotifySessionError
 import org.vander.spotifyclient.domain.state.SpotifySessionState
+import org.vander.spotifyclient.utils.getAuthorizationUrl
 import javax.inject.Inject
 
 class SpotifySessionUseCase @Inject constructor(
@@ -44,6 +47,9 @@ class SpotifySessionUseCase @Inject constructor(
         try {
             launchAuthFlow?.let {
                 authClient.authorize(activity, it)
+
+
+
             } ?: run {
                 _sessionState.value = SpotifySessionState.Failed(
                     SpotifySessionError.UnknownError(Exception("Authorization flow not set"))
@@ -76,9 +82,10 @@ class SpotifySessionUseCase @Inject constructor(
         }
     }
 
-    fun disconnect() {
+    suspend fun disconnect() {
         remoteProvider.disconnect()
         _sessionState.value = SpotifySessionState.Idle
+        authRepository.clearAccessToken()
     }
 
     private fun connectRemote(
