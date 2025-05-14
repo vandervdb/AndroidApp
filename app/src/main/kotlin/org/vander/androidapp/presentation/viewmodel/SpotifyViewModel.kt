@@ -13,14 +13,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.vander.coreui.IMiniPlayerViewModel
-import org.vander.spotifyclient.domain.data.CurrentlyPlayingAndQueue
 import org.vander.spotifyclient.domain.data.SpotifyPlaylistsResponse
+import org.vander.spotifyclient.domain.data.SpotifyQueue
 import org.vander.spotifyclient.domain.player.repository.IPlayerStateRepository
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import org.vander.spotifyclient.domain.state.SpotifySessionState
 import org.vander.spotifyclient.domain.usecase.SpotifyPlayerRemoteUseCase
 import org.vander.spotifyclient.domain.usecase.SpotifyPlaylistUseCase
 import org.vander.spotifyclient.domain.usecase.SpotifySessionUseCase
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,17 +36,17 @@ open class SpotifyViewModel @Inject constructor(
     override val playerStateData: StateFlow<PlayerStateData> = playerRepository.playerStateData
 
     private val _playlists = MutableStateFlow<Result<SpotifyPlaylistsResponse>?>(null)
-    val playlists: StateFlow<Result<SpotifyPlaylistsResponse>?> = _playlists
+    val playlists: StateFlow<Result<SpotifyPlaylistsResponse>?> = _playlists.asStateFlow()
 
-    private val _queue = MutableStateFlow<Result<CurrentlyPlayingAndQueue>?>(null)
-    val queue: StateFlow<Result<CurrentlyPlayingAndQueue>?> = _queue
+    private val _queue = MutableStateFlow<SpotifyQueue?>(null)
+    override val currentUserQueue: StateFlow<SpotifyQueue?> = _queue.asStateFlow()
 
     companion object {
         private const val TAG = "SpotifyViewModel"
     }
 
     init {
-        observeUserPlaylists()
+//        observeUserPlaylists()
         observeUserQueue()
     }
 

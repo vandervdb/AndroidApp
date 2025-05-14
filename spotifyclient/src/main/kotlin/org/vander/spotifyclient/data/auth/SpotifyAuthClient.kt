@@ -12,6 +12,10 @@ import com.spotify.sdk.android.auth.AuthorizationResponse
 import org.vander.spotifyclient.BuildConfig
 import org.vander.spotifyclient.domain.auth.ISpotifyAuthClient
 import org.vander.spotifyclient.utils.REDIRECT_URI
+import org.vander.spotifyclient.utils.USER_LIBRARY_MODIFY
+import org.vander.spotifyclient.utils.USER_LIBRARY_READ
+import org.vander.spotifyclient.utils.USER_READ_CURRENTLY_PLAYING
+import org.vander.spotifyclient.utils.USER_READ_PLAYBACK_STATE
 import org.vander.spotifyclient.utils.USER_READ_PRIVATE
 import javax.inject.Inject
 
@@ -20,13 +24,34 @@ class SpotifyAuthClient @Inject constructor() : ISpotifyAuthClient {
         private const val TAG = "SpotifyClient"
     }
 
+    /**
+     * Initiates the Spotify authorization flow.
+     *
+     * This function builds an [AuthorizationRequest] with the necessary client ID, redirect URI,
+     * and required scopes. It then creates an [Intent] for the Spotify login activity
+     * and launches it using the provided [ActivityResultLauncher].
+     * The array of scopes used by the login request defines the permissions that the user
+     * will be asked to grant to the app during the authorization process.
+     *
+     * @param contextActivity The current [Activity] context.
+     * @param launcher The [ActivityResultLauncher] used to launch the Spotify login activity.
+     */
     override fun authorize(contextActivity: Activity, launcher: ActivityResultLauncher<Intent>) {
         val request = AuthorizationRequest.Builder(
             BuildConfig.CLIENT_ID,
             AuthorizationResponse.Type.CODE,
             REDIRECT_URI,
         ).apply {
-            setScopes(arrayOf("streaming", USER_READ_PRIVATE))
+            setScopes(
+                arrayOf(
+                    "streaming",
+                    USER_READ_PRIVATE,
+                    USER_READ_CURRENTLY_PLAYING,
+                    USER_READ_PLAYBACK_STATE,
+                    USER_LIBRARY_MODIFY,
+                    USER_LIBRARY_READ
+                )
+            )
             setShowDialog(true)
         }.build()
         val intent = createLoginActivityIntent(contextActivity, request)
@@ -54,6 +79,7 @@ class SpotifyAuthClient @Inject constructor() : ISpotifyAuthClient {
                     Log.d(TAG, "Code d'autorisation reçu: ${response.code}")
                     onResult(Result.success(response.code))
                 }
+
                 else -> {
                     Log.e(TAG, "Erreur dans la réponse: ${response.error}")
                     onResult(Result.failure<String>(Exception(response.error)))

@@ -23,7 +23,7 @@ object AuthRemoteDataSourceModule {
         return KtorClientConfig(
             baseUrl = HTTPS_ACCOUNTS_SPOTIFY_COM_API,
             enableAuthPlugin = false,
-            logLevel = LogLevel.ALL
+            logLevel = LogLevel.INFO
         )
     }
 

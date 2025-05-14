@@ -37,7 +37,6 @@ class SpotifyPlayerClient @Inject constructor(
                     track.name + " by " + track.artist.name + "(paused: " + it.isPaused + " / coverUri: " + track.imageUri + ")"
                 )
                 this.playerStateData = it.toPlayerStateData()
-                Log.d(TAG, "Player state: $playerStateData")
                 function(playerStateData)
             }
         } ?: run {

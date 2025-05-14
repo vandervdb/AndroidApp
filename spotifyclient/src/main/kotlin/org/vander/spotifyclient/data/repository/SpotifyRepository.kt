@@ -4,13 +4,13 @@ import org.vander.spotifyclient.data.playlist.mapper.toDomain
 import org.vander.spotifyclient.data.remote.mapper.toDomain
 import org.vander.spotifyclient.domain.data.CurrentlyPlayingAndQueue
 import org.vander.spotifyclient.domain.data.SpotifyPlaylistsResponse
-import org.vander.spotifyclient.domain.datasource.IPlaylistRemoteDataSource
-import org.vander.spotifyclient.domain.playlist.repository.IPlaylistRepository
+import org.vander.spotifyclient.domain.datasource.ISpotifyRemoteDataSource
+import org.vander.spotifyclient.domain.playlist.repository.ISpotifyRepository
 import javax.inject.Inject
 
-class PlaylistRepository @Inject constructor(
-    private val remoteDataSource: IPlaylistRemoteDataSource
-) : IPlaylistRepository {
+class SpotifyRepository @Inject constructor(
+    private val remoteDataSource: ISpotifyRemoteDataSource
+) : ISpotifyRepository {
 
     override suspend fun getUserQueue(): Result<CurrentlyPlayingAndQueue> {
         return remoteDataSource.fetchUserQueue().map { it.toDomain() }

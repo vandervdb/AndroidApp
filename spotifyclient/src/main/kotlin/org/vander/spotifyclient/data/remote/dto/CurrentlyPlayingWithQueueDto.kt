@@ -21,7 +21,7 @@ data class SpotifyTrackDto(
     @SerialName("external_urls") val externalUrls: SpotifyExternalUrlDto,
     val href: String,
     val id: String,
-    @SerialName("is_playable") val isPlayable: Boolean,
+    @SerialName("is_playable") val isPlayable: Boolean = true,
     @SerialName("linked_from") val linkedFrom: Map<String, String> = emptyMap(), // vide ici
     val restrictions: SpotifyRestrictionsDto? = null,
     val name: String,

@@ -4,10 +4,10 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import org.vander.spotifyclient.data.remote.datasource.PlaylistRemoteDataSource
-import org.vander.spotifyclient.data.repository.PlaylistRepository
-import org.vander.spotifyclient.domain.datasource.IPlaylistRemoteDataSource
-import org.vander.spotifyclient.domain.playlist.repository.IPlaylistRepository
+import org.vander.spotifyclient.data.remote.datasource.SpotifyRemoteDataSource
+import org.vander.spotifyclient.data.repository.SpotifyRepository
+import org.vander.spotifyclient.domain.datasource.ISpotifyRemoteDataSource
+import org.vander.spotifyclient.domain.playlist.repository.ISpotifyRepository
 import javax.inject.Singleton
 
 @Module
@@ -17,12 +17,12 @@ abstract class PlaylistModule {
     @Binds
     @Singleton
     abstract fun bindPlaylistRepository(
-        impl: PlaylistRepository
-    ): IPlaylistRepository
+        impl: SpotifyRepository
+    ): ISpotifyRepository
 
     @Binds
     @Singleton
     abstract fun bindPlaylistRemoteDataSource(
-        impl: PlaylistRemoteDataSource
-    ): IPlaylistRemoteDataSource
+        impl: SpotifyRemoteDataSource
+    ): ISpotifyRemoteDataSource
 }

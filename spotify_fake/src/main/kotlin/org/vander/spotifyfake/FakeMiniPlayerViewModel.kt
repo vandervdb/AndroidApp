@@ -7,10 +7,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import org.vander.spotifyclient.domain.state.SpotifySessionState
 import org.vander.coreui.IMiniPlayerViewModel
+import org.vander.spotifyclient.domain.data.SpotifyQueue
 
 
 class FakeMiniPlayerViewModel : IMiniPlayerViewModel {
     override val sessionState = MutableStateFlow<SpotifySessionState>(SpotifySessionState.Ready)
+    override val currentUserQueue = MutableStateFlow<SpotifyQueue?>(null)
     override val playerStateData = MutableStateFlow<PlayerStateData>(
         PlayerStateData(
             trackName = "Zelda's Theme",

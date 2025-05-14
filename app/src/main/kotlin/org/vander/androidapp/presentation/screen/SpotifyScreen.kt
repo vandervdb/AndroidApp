@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +35,7 @@ fun SpotifyScreen(
 
     val tag = "SpotifyScreen"
     val sessionState by viewModel.sessionState.collectAsState()
+    val currentUserQueue by viewModel.currentUserQueue.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.requestAuthorization(launcher)

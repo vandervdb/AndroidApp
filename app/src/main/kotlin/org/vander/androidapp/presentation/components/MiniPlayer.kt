@@ -32,6 +32,7 @@ import org.vander.spotifyclient.domain.state.SpotifySessionState
 fun MiniPlayer(viewModel: IMiniPlayerViewModel) {
     val sessionState by viewModel.sessionState.collectAsState()
     val playerState by viewModel.playerStateData.collectAsState()
+    val currentUserQueue by viewModel.currentUserQueue.collectAsState()
 
     if (sessionState is SpotifySessionState.Ready) {
         MiniPlayerContent(
