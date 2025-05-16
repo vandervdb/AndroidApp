@@ -10,8 +10,10 @@ import com.spotify.protocol.types.Track
 fun createFakeTrack(): Track {
     val imageUri = ImageUri("https://via.placeholder.com/300")
 
-    val fakeArtist = Artist::class.java.getDeclaredConstructor().apply { isAccessible = true }.newInstance()
-    val fakeAlbum = Album::class.java.getDeclaredConstructor().apply { isAccessible = true }.newInstance()
+    val fakeArtist =
+        Artist::class.java.getDeclaredConstructor().apply { isAccessible = true }.newInstance()
+    val fakeAlbum =
+        Album::class.java.getDeclaredConstructor().apply { isAccessible = true }.newInstance()
 
     // On accède aux champs privés via la réflexion
     setField(fakeArtist, "name", "Fake Artist")
@@ -22,7 +24,8 @@ fun createFakeTrack(): Track {
     setField(fakeAlbum, "uri", "spotify:album:123")
     setField(fakeAlbum, "imageUri", null)
 
-    val fakeTrack = Track::class.java.getDeclaredConstructor().apply { isAccessible = true }.newInstance()
+    val fakeTrack =
+        Track::class.java.getDeclaredConstructor().apply { isAccessible = true }.newInstance()
 
     setField(fakeTrack, "artist", fakeArtist)
     setField(fakeTrack, "artists", listOf(fakeArtist))

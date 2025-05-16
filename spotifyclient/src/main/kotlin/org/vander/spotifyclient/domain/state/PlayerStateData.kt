@@ -3,7 +3,8 @@ package org.vander.spotifyclient.domain.state
 data class PlayerStateData(
     val trackName: String,
     val artistName: String,
-    val trackId: String?,
+    val coverId: String,
+    val trackId: String,
     val isPaused: Boolean,
     val playing: Boolean,
     val paused: Boolean,
@@ -12,14 +13,15 @@ data class PlayerStateData(
     val repeating: Boolean,
     val seeking: Boolean,
     val skippingNext: Boolean,
-    val skippingPrevious: Boolean,
+    val skippingPrevious: Boolean
 ) {
     companion object {
         fun empty(): PlayerStateData {
             return PlayerStateData(
                 trackName = "",
                 artistName = "",
-                trackId = null,
+                coverId = "",
+                trackId = "",
                 isPaused = true,
                 playing = false,
                 paused = true,
@@ -37,7 +39,7 @@ data class PlayerStateData(
         return "PlayerStateData(" +
                 "trackName='$trackName', " +
                 "artistName='$artistName', " +
-                "trackId='$trackId', " +
+                "coverId='$coverId', " +
                 "isPaused=$isPaused, " +
                 "playing=$playing, " +
                 "paused=$paused, " +

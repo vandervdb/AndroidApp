@@ -13,7 +13,7 @@ class DataStoreTokenProvider @Inject constructor(
 ) : ITokenProvider {
 
     override val tokenFlow: Flow<String?>
-        get()  = dataStoreManager.accessTokenFlow
+        get() = dataStoreManager.accessTokenFlow
 
     override suspend fun getAccessToken(): String? {
         return dataStoreManager.accessTokenFlow.firstOrNull()

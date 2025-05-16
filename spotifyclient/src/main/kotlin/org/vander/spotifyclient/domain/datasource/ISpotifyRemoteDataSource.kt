@@ -9,4 +9,6 @@ interface ISpotifyRemoteDataSource {
     suspend fun fetchUserPlaylists(): Result<SpotifyPlaylistsResponseDto>
     suspend fun fetchPlaylist(playlistId: String): Result<SpotifyPlaylistDto>
     suspend fun fetchIsTrackSaved(trackId: String): Result<Boolean>
+    suspend fun saveTrackForCurrentUser(trackId: String): Result<Unit>
+    suspend fun removeTrackForCurrentUser(trackId: String): Result<Unit>
 }

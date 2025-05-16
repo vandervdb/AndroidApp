@@ -22,7 +22,7 @@ import javax.inject.Inject
 class SpotifySessionUseCase @Inject constructor(
     private val authClient: ISpotifyAuthClient,
     private val remoteProvider: ISpotifyAppRemoteProvider,
-    private val authRepository: IAuthRepository
+    private val authRepository: IAuthRepository,
 ) {
     companion object {
         private const val TAG = "SpotifySessionUseCase"
@@ -35,17 +35,18 @@ class SpotifySessionUseCase @Inject constructor(
 
     private var launchAuthFlow: ActivityResultLauncher<Intent>? = null
 
+
     fun requestAuthorization(launchAuth: ActivityResultLauncher<Intent>) {
+        Log.d(TAG, "Requesting authorization...")
         launchAuthFlow = launchAuth
         _sessionState.value = SpotifySessionState.Authorizing
     }
 
     fun launchAuthorizationFlow(activity: Activity) {
+        Log.d(TAG, "Launching authorization flow...")
         try {
             launchAuthFlow?.let {
                 authClient.authorize(activity, it)
-
-
             } ?: run {
                 _sessionState.value = SpotifySessionState.Failed(
                     SpotifySessionError.UnknownError(Exception("Authorization flow not set"))
@@ -67,8 +68,17 @@ class SpotifySessionUseCase @Inject constructor(
                     val authCode = authResult.getOrElse { "" }
                     Log.d(TAG, "Launching auth token request...")
                     fetchAndStoreAuthToken(authCode)
-                    Log.d(TAG, "Connecting to remote...")
-                    connectRemote(context, coroutineScope)
+                        .onFailure {
+                            Log.e(TAG, "Error storing access token", it)
+                            _sessionState.value = SpotifySessionState.Failed(
+                                SpotifySessionError.AuthFailed(it)
+                            )
+                        }
+                        .onSuccess {
+                            Log.d(TAG, "Access token stored, Connecting to remote...")
+                            connectRemote(context, coroutineScope)
+
+                        }
                 }
             } else {
                 _sessionState.value = SpotifySessionState.Failed(
@@ -78,7 +88,7 @@ class SpotifySessionUseCase @Inject constructor(
         }
     }
 
-    suspend fun disconnect() {
+    suspend fun shutDown() {
         remoteProvider.disconnect()
         _sessionState.value = SpotifySessionState.Idle
         authRepository.clearAccessToken()
@@ -92,6 +102,7 @@ class SpotifySessionUseCase @Inject constructor(
         coroutineScope.launch(dispatcher) {
             val result = remoteProvider.connect(context)
             if (result.isSuccess) {
+                Log.d(TAG, "SpotifySessionState.Ready")
                 _sessionState.value = SpotifySessionState.Ready
             } else {
                 Log.e(TAG, "Failed to connect to remote", result.exceptionOrNull())
@@ -102,7 +113,7 @@ class SpotifySessionUseCase @Inject constructor(
         }
     }
 
-    private suspend fun fetchAndStoreAuthToken(authCode: String) {
-        authRepository.getAccessToken(authCode)
-    }
+    private suspend fun fetchAndStoreAuthToken(authCode: String): Result<Unit> =
+        authRepository.storeAccessToken(authCode)
+
 }

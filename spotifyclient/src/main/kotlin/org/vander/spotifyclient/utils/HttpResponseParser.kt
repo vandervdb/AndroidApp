@@ -1,10 +1,10 @@
 package org.vander.spotifyclient.utils
 
 import android.util.Log
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 import org.vander.spotifyclient.data.remote.dto.SpotifyErrorResponseDto
 
 suspend inline fun <reified T> HttpResponse.parseSpotifyResult(

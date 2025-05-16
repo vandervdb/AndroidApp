@@ -1,6 +1,6 @@
 package org.vander.androidapp.presentation.components
 
-import android.util.Log
+//import org.vander.spotifyfake.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,20 +8,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import org.vander.androidapp.data.util.SPOTIFY_COVER_UI
-//import org.vander.spotifyfake.R
 import org.vander.androidapp.R
+import org.vander.androidapp.data.util.SPOTIFY_COVER_UI
 
 @Composable
 fun SpotifyTrackCover(
@@ -40,7 +37,11 @@ fun SpotifyTrackCover(
     Image(
         painter = finalPainter,
         contentDescription = null,
-        modifier = modifier.clip(RoundedCornerShape(topEnd = 4.dp , topStart = 4.dp, bottomEnd = 4.dp, bottomStart = 4.dp)),
+        modifier = modifier.clip(
+            RoundedCornerShape(
+                topEnd = 4.dp, topStart = 4.dp, bottomEnd = 4.dp, bottomStart = 4.dp
+            )
+        ),
         contentScale = ContentScale.Crop
     )
 }
@@ -50,5 +51,5 @@ fun SpotifyTrackCover(
 fun SpotifyTrackCoverPreview() {
     val painter = painterResource(id = R.drawable.mr_scurff_test_cover)
     var modifier = Modifier.size(48.dp)
-    SpotifyTrackCover(imageUri = null, painter= painter, modifier)
+    SpotifyTrackCover(imageUri = null, painter = painter, modifier)
 }

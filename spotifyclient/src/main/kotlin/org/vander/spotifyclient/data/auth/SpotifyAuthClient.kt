@@ -56,7 +56,6 @@ class SpotifyAuthClient @Inject constructor() : ISpotifyAuthClient {
         }.build()
         val intent = createLoginActivityIntent(contextActivity, request)
         launcher.launch(intent)
-
     }
 
     override fun handleSpotifyAuthResult(

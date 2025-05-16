@@ -2,42 +2,36 @@ package org.vander.spotifyclient.domain.usecase
 
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import org.vander.spotifyclient.domain.auth.ITokenProvider
 import org.vander.spotifyclient.domain.data.CurrentlyPlayingAndQueue
-import org.vander.spotifyclient.domain.data.SpotifyPlaylistsResponse
 import org.vander.spotifyclient.domain.data.SpotifyQueue
 import org.vander.spotifyclient.domain.playlist.repository.ISpotifyRepository
+import org.vander.spotifyclient.domain.state.PlayerStateData
 import javax.inject.Inject
 
-class SpotifyPlaylistUseCase @Inject constructor(
+class SpotifyRemoteUseCase @Inject constructor(
     private val playlistRepository: ISpotifyRepository,
+    private val sessionUseCase: SpotifySessionUseCase,
     private val tokenProvider: ITokenProvider
 ) {
 
     companion object {
-        private const val TAG = "SpotifyPlaylistUseCase"
+        private const val TAG = "SpotifyRemoteUseCase"
     }
 
+    val _playerStateData: MutableStateFlow<PlayerStateData> =
+        MutableStateFlow(PlayerStateData.empty())
+    val playerStateData: StateFlow<PlayerStateData> = _playerStateData.asStateFlow()
 
-    fun observeUserPlaylistsWhenTokenAvailable(): Flow<Result<SpotifyPlaylistsResponse>> {
-        Log.d(TAG, "observeUserPlaylistsWhenTokenAvailable")
-        return tokenProvider.tokenFlow
-            .filterNotNull()
-            .filter { it.isNotBlank() }
-            .distinctUntilChanged()
-            .flatMapLatest {
-                Log.d(TAG, "observeUser Playlists TokenAvailable !")
-                kotlinx.coroutines.flow.flow {
-                    emit(playlistRepository.getUserPlaylists())
-                }
-            }
-    }
 
-    fun observeUserQueueWhenTokenAvailable(): Flow<SpotifyQueue> {
+    private fun observeUserQueueWhenTokenAvailable(): Flow<SpotifyQueue> {
         Log.d(TAG, "observeUserPlaylistsWhenTokenAvailable")
         return tokenProvider.tokenFlow
             .filterNotNull()

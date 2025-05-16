@@ -5,8 +5,8 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.scopes.ViewModelScoped
-import org.vander.spotifyclient.domain.auth.ISpotifyAuthClient
 import org.vander.spotifyclient.data.auth.SpotifyAuthClient
+import org.vander.spotifyclient.domain.auth.ISpotifyAuthClient
 
 @Module
 @InstallIn(ViewModelComponent::class)

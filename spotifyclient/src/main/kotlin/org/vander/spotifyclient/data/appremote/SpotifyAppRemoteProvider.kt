@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.vander.spotifyclient.BuildConfig
 import org.vander.spotifyclient.domain.appremote.ISpotifyAppRemoteProvider
-import org.vander.spotifyclient.utils.REDIRECT_URI
 import org.vander.spotifyclient.domain.state.SpotifyRemoteClientState
+import org.vander.spotifyclient.utils.REDIRECT_URI
 import javax.inject.Inject
 import javax.inject.Singleton
 

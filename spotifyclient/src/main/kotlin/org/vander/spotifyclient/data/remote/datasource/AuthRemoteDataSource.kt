@@ -40,7 +40,6 @@ class AuthRemoteDataSource @Inject constructor(
                 headers {
                     append("Content-Type", "application/x-www-form-urlencoded")
                     append("Authorization", "Basic $encodedCredentials")
-
                 }
             }
 

@@ -6,9 +6,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.scopes.ViewModelScoped
+import org.vander.spotifyclient.data.appremote.SpotifyAppRemoteProvider
 import org.vander.spotifyclient.data.player.SpotifyPlayerClient
 import org.vander.spotifyclient.domain.player.ISpotifyPlayerClient
-import org.vander.spotifyclient.data.appremote.SpotifyAppRemoteProvider
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -23,7 +23,9 @@ abstract class PlayerModule {
     companion object {
         @Provides
         @ViewModelScoped
-        fun provideSpotifyPlayerClient(appRemoteProvider: SpotifyAppRemoteProvider): SpotifyPlayerClient {
+        fun provideSpotifyPlayerClient(
+            appRemoteProvider: SpotifyAppRemoteProvider,
+        ): SpotifyPlayerClient {
             return SpotifyPlayerClient(appRemoteProvider)
         }
     }

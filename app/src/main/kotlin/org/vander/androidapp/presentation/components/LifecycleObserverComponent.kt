@@ -19,17 +19,20 @@ fun LifecycleObserverComponent(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_START -> {
-                  tag?.let {Log.d(tag, "Visible à l'écran")}
-                     onStartCallback?.invoke()
+                    tag?.let { Log.d(tag, "Visible à l'écran") }
+                    onStartCallback?.invoke()
                 }
+
                 Lifecycle.Event.ON_STOP -> {
-                    tag?.let {Log.d(tag, "Masqué (mais pas encore détruit)")}
+                    tag?.let { Log.d(tag, "Masqué (mais pas encore détruit)") }
                     onStopCallback?.invoke()
                 }
+
                 Lifecycle.Event.ON_DESTROY -> {
-                    tag?.let {Log.d(tag, "Détruit")}
+                    tag?.let { Log.d(tag, "Détruit") }
                     onStopCallback?.invoke()
                 }
+
                 else -> {
                     //ne dos pas arriver
                 }

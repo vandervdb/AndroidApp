@@ -2,11 +2,11 @@ package org.vander.androidapp.presentation.screen
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,25 +38,33 @@ fun SpotifyScreen(
     val currentUserQueue by viewModel.currentUserQueue.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.requestAuthorization(launcher)
-        viewModel.launchAuthorizationFlow(activity!!)
+        viewModel.startSpotifyClient(launcher, activity!!)
     }
 
-    LifecycleObserverComponent(tag, onStopCallback = viewModel::disconnectSpotify)
+    LifecycleObserverComponent(tag, onStopCallback = viewModel::shutDownSpotifyClient)
 
     Box(
         modifier = modifier.padding(32.dp),
         contentAlignment = Alignment.Center
     ) {
+        Log.d(tag, "Session state: $sessionState")
         when (sessionState) {
-            is SpotifySessionState.Idle,
-            is SpotifySessionState.Authorizing,
+            is SpotifySessionState.Idle -> {
+                Log.d(tag, "Idle...")
+            }
+
+            is SpotifySessionState.Authorizing -> {
+                Log.d(tag, "Authorizing...")
+            }
+
             is SpotifySessionState.ConnectingRemote -> {
+                Log.d(tag, "Connecting to remote...")
                 CircularProgressIndicator()
             }
 
             is SpotifySessionState.Ready -> {
                 Text("✅ Connecté à Spotify Remote !")
+                MiniPlayer(viewModel)
             }
 
             is SpotifySessionState.Failed -> {
@@ -68,16 +76,9 @@ fun SpotifyScreen(
 
             SpotifySessionState.IsPaused -> TODO()
         }
-        MiniPlayer(viewModel)
+
     }
 
-    if (sessionState is SpotifySessionState.Failed) {
-        Button(
-            onClick = { activity?.let { viewModel.launchAuthorizationFlow(it) } },
-            modifier = Modifier
-                .padding(16.dp)
-        ) {
-            Text("Réessayer")
-        }
-    }
+// TODO add button to relaunch authorization flow
+
 }

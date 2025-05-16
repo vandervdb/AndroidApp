@@ -1,8 +1,11 @@
 package org.vander.spotifyclient.data.remote.datasource
 
+import android.util.Log
 import io.ktor.client.HttpClient
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
+import io.ktor.client.request.put
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import kotlinx.serialization.json.Json
@@ -28,10 +31,8 @@ class SpotifyRemoteDataSource @Inject constructor(
                     append(HttpHeaders.Authorization, "Bearer $token")
                 }
             }
-            val rawBody = response.bodyAsText()
-            val json = Json { ignoreUnknownKeys = true }
-
             return response.parseSpotifyResult<CurrentlyPlayingWithQueueDto>("SpotifyRemoteDataSource")
+            
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -45,9 +46,6 @@ class SpotifyRemoteDataSource @Inject constructor(
                     append(HttpHeaders.Authorization, "Bearer $token")
                 }
             }
-            val rawBody = response.bodyAsText()
-            val json = Json { ignoreUnknownKeys = true }
-
             return response.parseSpotifyResult<SpotifyPlaylistsResponseDto>("SpotifyRemoteDataSource")
 
         } catch (e: Exception) {
@@ -74,10 +72,51 @@ class SpotifyRemoteDataSource @Inject constructor(
             }
             val rawBody = response.bodyAsText()
             val json = Json { ignoreUnknownKeys = true }
+            val isSavedList = json.decodeFromString<List<Boolean>>(rawBody)
+            val isSaved = isSavedList.firstOrNull() == true
 
-            return Result.success(true)
+            return Result.success(isSaved)
 
         } catch (e: Exception) {
+            Log.e("SpotifyRemoteDataSource", "Error fetching is track saved", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun saveTrackForCurrentUser(trackId: String): Result<Unit> {
+        return try {
+            val token = getAccessToken()
+            val response = httpClient.put("tracks") {
+                url {
+                    parameters.append("ids", trackId)
+                }
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $token")
+                }
+            }
+            return Result.success(Unit)
+
+        } catch (e: Exception) {
+            Log.e("SpotifyRemoteDataSource", "Error saving track $trackId", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun removeTrackForCurrentUser(trackId: String): Result<Unit> {
+        return try {
+            val token = getAccessToken()
+            val response = httpClient.delete("tracks") {
+                url {
+                    parameters.append("ids", trackId)
+                }
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $token")
+                }
+            }
+            return Result.success(Unit)
+
+        } catch (e: Exception) {
+            Log.e("SpotifyRemoteDataSource", "Error removing track $trackId from saved tracks", e)
             Result.failure(e)
         }
     }

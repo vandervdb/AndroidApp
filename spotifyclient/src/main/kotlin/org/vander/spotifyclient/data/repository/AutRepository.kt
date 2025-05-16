@@ -1,7 +1,6 @@
 package org.vander.spotifyclient.data.repository
 
 import android.util.Log
-import org.vander.spotifyclient.data.local.DataStoreManager
 import org.vander.spotifyclient.data.remote.datasource.AuthRemoteDataSource
 import org.vander.spotifyclient.domain.auth.IAuthRepository
 import org.vander.spotifyclient.domain.auth.IDataStoreManager
@@ -16,25 +15,21 @@ class AutRepository @Inject constructor(
         private const val TAG = "AuthRepository"
     }
 
-    override suspend fun getAccessToken(authCode: String): Result<String> {
+    override suspend fun storeAccessToken(authCode: String): Result<Unit> {
         return authRemoteDataSource.fetchAccessToken(authCode)
-            .onSuccess { storeAccessToken(it.accessToken) }
-            .onFailure {
-                Log.e(
-                    "AuthRepository",
-                    "Erreur lors de la récupération du token",
-                    it
-                )
+            .onFailure { Log.e(TAG, "Error fetching access token", it) }
+            .mapCatching { dto ->
+                Log.d(TAG, "Saving access token: ${dto.accessToken}")
+                dataStoreManager.saveAccessToken(dto.accessToken)
             }
-            .map { it.accessToken }
     }
 
-    override suspend fun storeAccessToken(token: String) {
-        dataStoreManager.saveAccessToken(token)
+    override suspend fun getAccessToken(): Result<String> {
+        return dataStoreManager.getAccessToken()
     }
 
-    override suspend fun clearAccessToken() {
-        dataStoreManager.clearAccessToken()
+    override suspend fun clearAccessToken(): Result<Unit> {
+        return dataStoreManager.clearAccessToken()
     }
 
 }

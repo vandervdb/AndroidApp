@@ -6,26 +6,30 @@ import com.spotify.protocol.types.Track
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.vander.spotifyclient.domain.player.ISpotifyPlayerClient
-import org.vander.spotifyclient.domain.appremote.ISpotifyAppRemoteProvider
 import org.vander.spotifyclient.data.player.mapper.toPlayerStateData
+import org.vander.spotifyclient.domain.appremote.ISpotifyAppRemoteProvider
+import org.vander.spotifyclient.domain.player.ISpotifyPlayerClient
 import org.vander.spotifyclient.domain.state.PlayerConnectionState
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import javax.inject.Inject
 
 class SpotifyPlayerClient @Inject constructor(
-    private val appRemoteProvider: ISpotifyAppRemoteProvider
+    private val appRemoteProvider: ISpotifyAppRemoteProvider,
 ) : ISpotifyPlayerClient {
 
     companion object {
         const val TAG = "SpotifyPlayerClient"
     }
 
+    private var isPlaying = false
     private val playerApi: PlayerApi?
         get() = appRemoteProvider.get()?.playerApi
-    private var playerStateData: PlayerStateData = PlayerStateData.empty()
-    private val _playerConnectionState = MutableStateFlow<PlayerConnectionState>(PlayerConnectionState.NotConnected)
-    override val playerConnectionState: StateFlow<PlayerConnectionState> = _playerConnectionState.asStateFlow()
+
+
+    private val _playerConnectionState =
+        MutableStateFlow<PlayerConnectionState>(PlayerConnectionState.NotConnected)
+    override val playerConnectionState: StateFlow<PlayerConnectionState> =
+        _playerConnectionState.asStateFlow()
 
 
     override suspend fun subscribeToPlayerState(function: (PlayerStateData) -> Unit) {
@@ -34,10 +38,11 @@ class SpotifyPlayerClient @Inject constructor(
                 val track: Track = it.track
                 Log.d(
                     TAG,
-                    track.name + " by " + track.artist.name + "(paused: " + it.isPaused + " / coverUri: " + track.imageUri + ")"
+                    track.name + " by " + track.artist.name + "(paused: " + it.isPaused +
+                            " / coverUri: " + track.imageUri + ")"
                 )
-                this.playerStateData = it.toPlayerStateData()
-                function(playerStateData)
+                isPlaying = !it.isPaused
+                function(it.toPlayerStateData())
             }
         } ?: run {
             Log.e(TAG, "spotifyPlayerApi is null")
@@ -55,6 +60,7 @@ class SpotifyPlayerClient @Inject constructor(
     }
 
     override suspend fun resume() {
+        Log.d(TAG, "resume: ")
         playerApi?.resume()
     }
 
@@ -83,6 +89,7 @@ class SpotifyPlayerClient @Inject constructor(
     }
 
     override fun isPlaying(): Boolean {
-        return playerStateData.playing
+        return isPlaying
     }
+
 }

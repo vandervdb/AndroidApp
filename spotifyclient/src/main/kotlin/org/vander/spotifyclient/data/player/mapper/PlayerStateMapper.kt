@@ -6,15 +6,17 @@ import org.vander.spotifyclient.domain.state.PlayerStateData
 
 fun PlayerState.toPlayerStateData(): PlayerStateData {
     val track = this.track
+    Log.d("PlayerStateMapper", "Track uri: ${track?.uri}")
     return PlayerStateData(
         trackName = track?.name ?: "Unknown Track",
         artistName = track?.artist?.name ?: "Unknown Artist",
-        trackId = track.imageUri.toString().extractSpotifyTrackIdOrNull() ?: "",
+        coverId = track.imageUri.toString().extractSpotifyCoverIdOrNull() ?: "",
+        trackId = track.uri.toString().extractSpotifyTrackIdOrNull() ?: "",
         isPaused = isPaused,
         playing = !isPaused,
         paused = isPaused,
         stopped = false,
-        shuffling = playbackOptions?.isShuffling ?: false,
+        shuffling = playbackOptions?.isShuffling == true,
         repeating = playbackOptions?.repeatMode == 1, // 1 = repeat context, 2 = repeat track
         seeking = false,
         skippingNext = playbackRestrictions?.canSkipNext == false,
@@ -22,9 +24,16 @@ fun PlayerState.toPlayerStateData(): PlayerStateData {
     )
 }
 
-fun String.extractSpotifyTrackIdOrNull(): String? {
+fun String.extractSpotifyCoverIdOrNull(): String? {
     return if (startsWith("ImageId{spotify:image:")) {
         substringAfter("ImageId{spotify:image:")
             .substringBefore("'}")
     } else null
+}
+
+fun String.extractSpotifyTrackIdOrNull(): String? {
+    return if (startsWith("spotify:track:")) {
+        substringAfter("spotify:track:")
+    } else null
+
 }

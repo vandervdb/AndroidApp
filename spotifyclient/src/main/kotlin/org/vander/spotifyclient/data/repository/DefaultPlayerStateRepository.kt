@@ -4,8 +4,8 @@ import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.vander.spotifyclient.domain.player.repository.IPlayerStateRepository
 import org.vander.spotifyclient.domain.player.ISpotifyPlayerClient
+import org.vander.spotifyclient.domain.player.repository.IPlayerStateRepository
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import javax.inject.Inject
 
@@ -33,6 +33,6 @@ class DefaultPlayerStateRepository @Inject constructor(
 
     override suspend fun stopListening() {
         isListening = false
-
     }
+
 }

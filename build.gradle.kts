@@ -22,10 +22,11 @@ tasks.register("checkCatalogConsistency") {
 
         val content = tomlFile.readText()
 
-        val declaredVersions = Regex("""^\s*([a-zA-Z0-9_-]+)\s*=\s*["'][^"']+["']""", RegexOption.MULTILINE)
-            .findAll(content.substringAfter("[versions]").substringBefore("["))
-            .map { it.groupValues[1] }
-            .toSet()
+        val declaredVersions =
+            Regex("""^\s*([a-zA-Z0-9_-]+)\s*=\s*["'][^"']+["']""", RegexOption.MULTILINE)
+                .findAll(content.substringAfter("[versions]").substringBefore("["))
+                .map { it.groupValues[1] }
+                .toSet()
 
         val usedVersionKeys = Regex("""version(?:\.ref)?\s*=\s*["']([a-zA-Z0-9_-]+)["']""")
             .findAll(content)
@@ -46,7 +47,8 @@ tasks.register("checkCatalogConsistency") {
 
 tasks.register("checkVersionHardcodedUsages") {
     group = "verification"
-    description = "Checkin whether if every dependecy in dependencies { } block use GradleVersion Catalog (libs.*)."
+    description =
+        "Checkin whether if every dependecy in dependencies { } block use GradleVersion Catalog (libs.*)."
 
     doLast {
         println("🔍 Looking for hard coded dependencies in  dependencies { } block...")

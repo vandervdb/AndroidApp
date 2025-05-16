@@ -5,16 +5,16 @@ import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import kotlinx.coroutines.flow.StateFlow
 import org.vander.spotifyclient.domain.data.SpotifyQueue
-import org.vander.spotifyclient.domain.state.PlayerStateData
+import org.vander.spotifyclient.domain.state.SpotifyPlayerState
 import org.vander.spotifyclient.domain.state.SpotifySessionState
 
 interface IMiniPlayerViewModel {
     val sessionState: StateFlow<SpotifySessionState>
-    val playerStateData: StateFlow<PlayerStateData>
+    val spotifyPlayerState: StateFlow<SpotifyPlayerState>
     val currentUserQueue: StateFlow<SpotifyQueue?>
-    fun requestAuthorization(launcher: ActivityResultLauncher<Intent>)
-    fun launchAuthorizationFlow(activity: Activity)
+    fun startSpotifyClient(launcher: ActivityResultLauncher<Intent>, activity: Activity)
+    fun shutDownSpotifyClient()
     fun togglePlayPause()
-    fun isPlaying(): Boolean
-    fun disconnectSpotify()
+    fun checkIfTrackSaved(trackId: String)
+    fun toggleSaveTrack(trackId: String)
 }

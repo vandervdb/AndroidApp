@@ -20,5 +20,16 @@ class SpotifyRepository @Inject constructor(
         return remoteDataSource.fetchUserPlaylists().map { it.toDomain() }
     }
 
+    override suspend fun isTrackSaved(trackId: String): Result<Boolean> {
+        return remoteDataSource.fetchIsTrackSaved(trackId)
+    }
+
+    override suspend fun saveTrack(trackId: String): Result<Unit> {
+        return remoteDataSource.saveTrackForCurrentUser(trackId)
+    }
+
+    override suspend fun removeTrack(trackId: String): Result<Unit> {
+        return remoteDataSource.removeTrackForCurrentUser(trackId)
+    }
 
 }
