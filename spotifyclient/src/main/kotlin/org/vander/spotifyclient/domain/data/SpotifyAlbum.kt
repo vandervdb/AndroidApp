@@ -13,4 +13,23 @@ data class SpotifyAlbum(
     val type: String,
     val uri: String,
     val artists: List<SpotifyArtist>
-)
+) {
+    companion object {
+        fun empty(): SpotifyAlbum {
+            return SpotifyAlbum(
+                albumType = "",
+                totalTracks = 0,
+                availableMarkets = emptyList(),
+                externalUrls = "",
+                href = "",
+                id = "",
+                images = emptyList(),
+                name = "",
+                releaseDate = "",
+                type = "",
+                uri = "",
+                artists = emptyList()
+            )
+        }
+    }
+}

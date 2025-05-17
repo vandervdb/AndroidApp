@@ -16,4 +16,26 @@ class SpotifyTrack(
     trackNumber: Int,
     val type: String,
     val uri: String,
-)
+) {
+    companion object {
+        fun empty(): SpotifyTrack {
+            return SpotifyTrack(
+                album = SpotifyAlbum.empty(),
+                artists = emptyList(),
+                availableMarkets = emptyList(),
+                discNumber = 0,
+                durationMs = 0,
+                explicit = false,
+                externalIds = "",
+                externalUrls = "",
+                href = "",
+                id = "",
+                isPlayable = false,
+                name = "",
+                trackNumber = 0,
+                type = "",
+                uri = ""
+            )
+        }
+    }
+}

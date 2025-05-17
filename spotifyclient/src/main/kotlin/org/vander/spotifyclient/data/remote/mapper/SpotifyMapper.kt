@@ -15,9 +15,9 @@ import org.vander.spotifyclient.domain.data.SpotifyTrack
 
 fun CurrentlyPlayingWithQueueDto.toDomain(): CurrentlyPlayingAndQueue {
     return CurrentlyPlayingAndQueue(
-        currentlyPlaying = currentlyPlaying.toDomain(),
+        currentlyPlaying = currentlyPlaying?.toDomain(),
         queue = SpotifyQueue(
-            tracks = queue.map { it.toDomain() }
+            tracks = queue.map { it?.toDomain() ?: SpotifyTrack.empty() }
         )
     )
 }

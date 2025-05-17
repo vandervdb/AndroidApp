@@ -10,8 +10,8 @@ interface ISpotifyPlayerClient {
     suspend fun play(trackUri: String)
     suspend fun pause()
     suspend fun resume()
-    suspend fun skipNext(): Result<Unit>
-    suspend fun skipPrevious(): Result<Unit>
+    suspend fun skipNext()
+    suspend fun skipPrevious()
     fun seek(position: Int)
     fun setVolume(volume: Int)
     fun setShuffle(shuffle: Boolean)

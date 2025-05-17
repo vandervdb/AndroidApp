@@ -5,10 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import org.vander.spotifyclient.domain.auth.ITokenProvider
 import org.vander.spotifyclient.domain.data.CurrentlyPlayingAndQueue
 import org.vander.spotifyclient.domain.data.SpotifyQueue
@@ -18,33 +15,19 @@ import javax.inject.Inject
 
 class SpotifyRemoteUseCase @Inject constructor(
     private val playlistRepository: ISpotifyRepository,
-    private val sessionUseCase: SpotifySessionUseCase,
-    private val tokenProvider: ITokenProvider
 ) {
 
     companion object {
         private const val TAG = "SpotifyRemoteUseCase"
     }
 
-    val _playerStateData: MutableStateFlow<PlayerStateData> =
-        MutableStateFlow(PlayerStateData.empty())
-    val playerStateData: StateFlow<PlayerStateData> = _playerStateData.asStateFlow()
+    private val _currentUserQueue = MutableStateFlow<SpotifyQueue?>(null)
+    val currentUserQueue: StateFlow<SpotifyQueue?> = _currentUserQueue.asStateFlow()
 
-
-    private fun observeUserQueueWhenTokenAvailable(): Flow<SpotifyQueue> {
-        Log.d(TAG, "observeUserPlaylistsWhenTokenAvailable")
-        return tokenProvider.tokenFlow
-            .filterNotNull()
-            .filter { it.isNotBlank() }
-            .distinctUntilChanged()
-            .flatMapLatest {
-                Log.d(TAG, "observeUser Playlists TokenAvailable !")
-                kotlinx.coroutines.flow.flow {
-                    parseCurrentUserQueueResponse(playlistRepository.getUserQueue())?.let {
-                        emit(it)
-                    }
-                }
-            }
+    suspend fun getAndEmitUserQueueFlow() {
+            parseCurrentUserQueueResponse(playlistRepository.getUserQueue())?.let {
+                _currentUserQueue.value = it
+        }
     }
 
     private fun parseCurrentUserQueueResponse(result: Result<CurrentlyPlayingAndQueue>): SpotifyQueue? {

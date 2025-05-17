@@ -13,11 +13,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.vander.spotifyclient.domain.data.SpotifyPlaylistsResponse
-import org.vander.spotifyclient.domain.data.SpotifyQueue
 import org.vander.spotifyclient.domain.player.ISpotifyPlayerClient
 import org.vander.spotifyclient.domain.player.repository.IPlayerStateRepository
 import org.vander.spotifyclient.domain.playlist.repository.ISpotifyRepository
 import org.vander.spotifyclient.domain.state.PlayerStateData
+import org.vander.spotifyclient.domain.state.SavedRemotelyChangedState
 import org.vander.spotifyclient.domain.state.SpotifyPlayerState
 import org.vander.spotifyclient.domain.state.SpotifySessionState
 import org.vander.spotifyclient.domain.state.copyWithBase
@@ -46,22 +46,22 @@ class SpotifyUseCase @Inject constructor(
     val _spotifyPlayerState = MutableStateFlow<SpotifyPlayerState>(SpotifyPlayerState.empty())
     val spotifyPlayerState: StateFlow<SpotifyPlayerState> = _spotifyPlayerState.asStateFlow()
 
+    val savedRemotelyChangedState: StateFlow<SavedRemotelyChangedState> =
+        playerStateRepository.savedRemotelyChangedState
+
     private val _playlists = MutableStateFlow<Result<SpotifyPlaylistsResponse>?>(null)
     val playlists: StateFlow<Result<SpotifyPlaylistsResponse>?> = _playlists.asStateFlow()
 
-    private val _queue = MutableStateFlow<SpotifyQueue?>(null)
-    val currentUserQueue: StateFlow<SpotifyQueue?> = _queue.asStateFlow()
-
-    suspend fun startUp(launchAuth: ActivityResultLauncher<Intent>, activity: Activity) {
-        Log.d(TAG, "Starting up...")
-        sessionUseCase.requestAuthorization(launchAuth)
-        sessionUseCase.launchAuthorizationFlow(activity)
-        this.activity = activity
+    suspend fun startUp(launchAuth: ActivityResultLauncher<Intent>, activity: Activity) =
         coroutineScope {
-            launch { observePlayerStateData() }
+            Log.d(TAG, "Starting up...")
+            sessionUseCase.requestAuthorization(launchAuth)
+            sessionUseCase.launchAuthorizationFlow(activity)
+            this@SpotifyUseCase.activity = activity
+            launch { observePlayerStateData() } // TODO: Group in one call
             launch { collectSessionState() }
+            launch { observeSavedRemotelyChangedState() }
         }
-    }
 
     fun handleAuthResult(context: Context, result: ActivityResult, viewModelScope: CoroutineScope) {
         sessionUseCase.handleAuthResult(context, result, viewModelScope)
@@ -72,6 +72,7 @@ class SpotifyUseCase @Inject constructor(
     }
 
     suspend fun togglePlayPause() {
+        _spotifyPlayerState.togglePause()
         if (playerClient.isPlaying()) {
             playerClient.pause()
         } else {
@@ -92,6 +93,7 @@ class SpotifyUseCase @Inject constructor(
             when (sessionState) {
                 is SpotifySessionState.Ready -> {
                     Log.d(TAG, "Session state: Ready")
+                    remoteUseCase.getAndEmitUserQueueFlow()
                     playerRepository.startListening()
                 }
 
@@ -106,21 +108,40 @@ class SpotifyUseCase @Inject constructor(
         Log.d(TAG, "Observing player state data...")
         playerStateRepository.playerStateData.collect { playerStateData ->
             Log.d(TAG, "Received player state data: $playerStateData")
+            Log.d(TAG, "Spotify player state: ${_spotifyPlayerState.value}")
             if (playerStateData != PlayerStateData.empty()) {
-                val stateIsTrackSaved = _spotifyPlayerState.value.isTrackSaved
-                val isSaved = if (stateIsTrackSaved == null) {
-                    spotifyRepository.isTrackSaved(playerStateData.trackId).getOrDefault(false)
-                } else {
-                    Log.d(TAG, "State is track saved did not change: $stateIsTrackSaved")
-                    stateIsTrackSaved!!
-                }
-                val currentPlayerState = _spotifyPlayerState.value
-                _spotifyPlayerState.value = currentPlayerState
-                    .copyWithSaved(isSaved)
-                    .copyWithBase(playerStateData)
+                updateSpotifyPlayerWithIsSavedState(playerStateData)
             }
         }
     }
 
+    private suspend fun observeSavedRemotelyChangedState() {
+        Log.d(TAG, "Observing saved remotely changed state...")
+        savedRemotelyChangedState.collect { state ->
+            val isSaved = state.isSaved
+            Log.d(TAG, "Received saved remotely changed state: $isSaved")
+            if (isSaved) {
+                Log.d(TAG, "Saved remotely changed state: true")
+                val trackId = state.trackId
+                updateSpotifyPlayerWithIsSavedState(playerStateData = null, trackId)
+            }
+        }
+    }
+
+    private suspend fun updateSpotifyPlayerWithIsSavedState(
+        playerStateData: PlayerStateData? = null,
+        trackId: String? = null
+    ) {
+        Log.d(TAG, "Updating Spotify player state: $playerStateData")
+        var currentTrackId = playerStateData?.trackId ?: trackId!!
+        val isSaved = spotifyRepository.isTrackSaved(currentTrackId).getOrDefault(false)
+        val currentPlayerState = _spotifyPlayerState.value
+        _spotifyPlayerState.value = currentPlayerState
+            .copyWithSaved(isSaved)
+        if (playerStateData != null) {
+            _spotifyPlayerState.value = _spotifyPlayerState.value.copyWithBase(playerStateData)
+        }
+
+    }
 
 }

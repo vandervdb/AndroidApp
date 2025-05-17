@@ -38,8 +38,8 @@ class SpotifyPlayerClient @Inject constructor(
                 val track: Track = it.track
                 Log.d(
                     TAG,
-                    track.name + " by " + track.artist.name + "(paused: " + it.isPaused +
-                            " / coverUri: " + track.imageUri + ")"
+                    "PlayerClient received new data" + track.name + " by " + track.artist.name +
+                            "(paused: " + it.isPaused + " / coverUri: " + track.imageUri + ")"
                 )
                 isPlaying = !it.isPaused
                 function(it.toPlayerStateData())
@@ -64,12 +64,12 @@ class SpotifyPlayerClient @Inject constructor(
         playerApi?.resume()
     }
 
-    override suspend fun skipNext(): Result<Unit> {
-        TODO("Not yet implemented")
+    override suspend fun skipNext() {
+        playerApi?.skipNext()
     }
 
-    override suspend fun skipPrevious(): Result<Unit> {
-        TODO("Not yet implemented")
+    override suspend fun skipPrevious() {
+        playerApi?.skipPrevious()
     }
 
     override fun seek(position: Int) {

@@ -18,12 +18,14 @@ import org.vander.spotifyclient.domain.data.SpotifyPlaylistsResponse
 import org.vander.spotifyclient.domain.data.SpotifyQueue
 import org.vander.spotifyclient.domain.playlist.repository.ISpotifyRepository
 import org.vander.spotifyclient.domain.state.SpotifyPlayerState
+import org.vander.spotifyclient.domain.usecase.SpotifyRemoteUseCase
 import org.vander.spotifyclient.domain.usecase.SpotifyUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 open class SpotifyViewModel @Inject constructor(
     private val spotifyUseCase: SpotifyUseCase,
+    private val remoteUseCase: SpotifyRemoteUseCase,
     private val spotifyRepository: ISpotifyRepository,
 ) : ViewModel(), IMiniPlayerViewModel {
 
@@ -45,8 +47,7 @@ open class SpotifyViewModel @Inject constructor(
     override fun startSpotifyClient(launcher: ActivityResultLauncher<Intent>, activity: Activity) {
         viewModelScope.launch { spotifyUseCase.startUp(launcher, activity) }
     }
-
-
+    
     override fun shutDownSpotifyClient() {
         viewModelScope.launch {
             spotifyUseCase.shutDown()
@@ -65,6 +66,12 @@ open class SpotifyViewModel @Inject constructor(
         val action = if (isSaved == true) ::removeTrackFromSaved else ::saveTrack
         Log.d(TAG, "toggleSaveTrack: $isSaved")
         action(trackId)
+    }
+
+    override fun togglePlayPause() {
+        viewModelScope.launch {
+            spotifyUseCase.togglePlayPause()
+        }
     }
 
     fun saveTrack(trackId: String) {
@@ -93,32 +100,5 @@ open class SpotifyViewModel @Inject constructor(
         spotifyUseCase.handleAuthResult(context, result, viewModelScope)
     }
 
-
-    override fun togglePlayPause() {
-        viewModelScope.launch {
-            spotifyUseCase.togglePlayPause()
-        }
-    }
-
-
-//    private fun observeUserPlaylists() {
-//        viewModelScope.launch {
-//            playlistUseCase.observeUserPlaylistsWhenTokenAvailable()
-//                .collect { result ->
-//                    Log.d(TAG, "Received playlists: $result")
-//                    _playlists.value = result
-//                }
-//        }
-//    }
-
-//    private fun observeUserQueue() {
-//        viewModelScope.launch {
-//            playlistUseCase.observeUserQueueWhenTokenAvailable()
-//                .collect { result ->
-//                    Log.d(TAG, "Received queue: $result")
-//                    _queue.value = result
-//                }
-//        }
-//    }
 
 }

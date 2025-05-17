@@ -6,7 +6,7 @@ data class SpotifyPlayerState(
 ) {
     companion object {
         fun empty(): SpotifyPlayerState {
-            return SpotifyPlayerState(PlayerStateData.empty(), false)
+            return SpotifyPlayerState(PlayerStateData.empty(), null)
         }
     }
 }

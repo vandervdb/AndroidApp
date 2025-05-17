@@ -34,21 +34,4 @@ data class PlayerStateData(
             )
         }
     }
-
-    override fun toString(): String {
-        return "PlayerStateData(" +
-                "trackName='$trackName', " +
-                "artistName='$artistName', " +
-                "coverId='$coverId', " +
-                "isPaused=$isPaused, " +
-                "playing=$playing, " +
-                "paused=$paused, " +
-                "stopped=$stopped, " +
-                "shuffling=$shuffling, " +
-                "repeating=$repeating, " +
-                "seeking=$seeking, " +
-                "skippingNext=$skippingNext, " +
-                "skippingPrevious=$skippingPrevious" +
-                ")"
-    }
 }

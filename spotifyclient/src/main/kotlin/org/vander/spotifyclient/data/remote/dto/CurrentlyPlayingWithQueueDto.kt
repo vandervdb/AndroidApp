@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CurrentlyPlayingWithQueueDto(
-    @SerialName("currently_playing") val currentlyPlaying: SpotifyTrackDto,
-    val queue: List<SpotifyTrackDto>
+    @SerialName("currently_playing") val currentlyPlaying: SpotifyTrackDto? = null,
+    val queue: List<SpotifyTrackDto?> = emptyList()
 )
 
 @Serializable
