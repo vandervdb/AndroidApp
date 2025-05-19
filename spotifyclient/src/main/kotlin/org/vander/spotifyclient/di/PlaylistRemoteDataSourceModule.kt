@@ -18,21 +18,21 @@ object PlaylistRemoteDataSourceModule {
 
     @Provides
     @Singleton
-    @Named("PlaylistHttpClientConfig")
-    fun providePlaylistHttpClientConfig(): KtorClientConfig {
+    @Named("SpotifyRemoteHttpClientConfig")
+    fun provideSpotifyRemoteHttpClientConfig(): KtorClientConfig {
         return KtorClientConfig(
             baseUrl = HTTPS_API_SPOTIFY_COM_V_1_ME,
             enableAuthPlugin = true,
-            logLevel = LogLevel.ALL
+            logLevel = LogLevel.NONE
         )
     }
 
     @Provides
     @Singleton
-    @Named("PlaylistHttpClient")
-    fun providePlaylistHttpClient(
+    @Named("SpotifyRemoteHttpClient")
+    fun provideSpotifyRemoteHttpClient(
         tokenProvider: ITokenProvider,
-        @Named("PlaylistHttpClientConfig") config: KtorClientConfig
+        @Named("SpotifyRemoteHttpClientConfig") config: KtorClientConfig
     ): HttpClient {
         return NetworkModule.provideKtorClient(tokenProvider, config)
     }

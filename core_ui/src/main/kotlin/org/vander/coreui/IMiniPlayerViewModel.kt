@@ -7,14 +7,16 @@ import kotlinx.coroutines.flow.StateFlow
 import org.vander.spotifyclient.domain.data.SpotifyQueue
 import org.vander.spotifyclient.domain.state.SpotifyPlayerState
 import org.vander.spotifyclient.domain.state.SpotifySessionState
+import org.vander.spotifyclient.domain.state.UIQueueState
 
 interface IMiniPlayerViewModel {
     val sessionState: StateFlow<SpotifySessionState>
+    val uIQueueState: StateFlow<UIQueueState>
     val spotifyPlayerState: StateFlow<SpotifyPlayerState>
-    val currentUserQueue: StateFlow<SpotifyQueue?>
     fun startSpotifyClient(launcher: ActivityResultLauncher<Intent>, activity: Activity)
     fun shutDownSpotifyClient()
     fun togglePlayPause()
+    fun playTrack(trackId: String)
     fun checkIfTrackSaved(trackId: String)
     fun toggleSaveTrack(trackId: String)
 }

@@ -19,7 +19,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class SpotifyRemoteDataSource @Inject constructor(
-    @Named("PlaylistHttpClient") private val httpClient: HttpClient,
+    @Named("SpotifyRemoteHttpClient") private val httpClient: HttpClient,
     private val tokenProvider: ITokenProvider
 ) : ISpotifyRemoteDataSource {
 

@@ -4,6 +4,7 @@ import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import org.vander.spotifyclient.domain.player.ISpotifyPlayerClient
 import org.vander.spotifyclient.domain.player.repository.IPlayerStateRepository
 import org.vander.spotifyclient.domain.state.PlayerStateData
@@ -22,7 +23,8 @@ class DefaultPlayerStateRepository @Inject constructor(
     override val playerStateData: StateFlow<PlayerStateData> = _playerStateData.asStateFlow()
 
     private val _savedRemotelyChangedState = MutableStateFlow<SavedRemotelyChangedState>(SavedRemotelyChangedState())
-    override val savedRemotelyChangedState: StateFlow<SavedRemotelyChangedState> = _savedRemotelyChangedState.asStateFlow()
+    override val savedRemotelyChangedState: StateFlow<SavedRemotelyChangedState> =
+        _savedRemotelyChangedState.asStateFlow()
 
     private var isListening = false
 
@@ -32,10 +34,10 @@ class DefaultPlayerStateRepository @Inject constructor(
         playerClient.subscribeToPlayerState() { newState ->
             if (newState == _playerStateData.value) {
                 Log.d(TAG, "Player state did not change -> saved status changed")
-                _savedRemotelyChangedState.value = SavedRemotelyChangedState(true, newState.trackId)
-                _savedRemotelyChangedState.value = SavedRemotelyChangedState(false) // reset
+                _savedRemotelyChangedState.update { SavedRemotelyChangedState(true, newState.trackId) }
+                _savedRemotelyChangedState.update { SavedRemotelyChangedState(false) }  // reset
             }
-            _playerStateData.value = newState
+            _playerStateData.update { newState }
         }
     }
 

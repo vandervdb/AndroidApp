@@ -6,6 +6,7 @@ import com.spotify.protocol.types.Track
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import org.vander.spotifyclient.data.player.mapper.toPlayerStateData
 import org.vander.spotifyclient.domain.appremote.ISpotifyAppRemoteProvider
 import org.vander.spotifyclient.domain.player.ISpotifyPlayerClient
@@ -46,12 +47,12 @@ class SpotifyPlayerClient @Inject constructor(
             }
         } ?: run {
             Log.e(TAG, "spotifyPlayerApi is null")
-            _playerConnectionState.value = PlayerConnectionState.NotConnected
+            _playerConnectionState.update { PlayerConnectionState.NotConnected }
         }
     }
 
     override suspend fun play(trackUri: String) {
-        Log.d(TAG, "play: ")
+        Log.d(TAG, "play trackUri: $trackUri")
         playerApi?.play(trackUri)
     }
 

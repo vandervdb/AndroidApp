@@ -5,17 +5,16 @@ import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.vander.coreui.IMiniPlayerViewModel
-import org.vander.spotifyclient.domain.data.SpotifyQueue
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import org.vander.spotifyclient.domain.state.SpotifyPlayerState
 import org.vander.spotifyclient.domain.state.SpotifySessionState
-import org.vander.spotifyclient.domain.state.isPaused
+import org.vander.spotifyclient.domain.state.UIQueueState
 import org.vander.spotifyclient.domain.state.togglePause
 
 
 class FakeMiniPlayerViewModel : IMiniPlayerViewModel {
     override val sessionState = MutableStateFlow<SpotifySessionState>(SpotifySessionState.Ready)
-    override val currentUserQueue = MutableStateFlow<SpotifyQueue?>(null)
+    override val uIQueueState = MutableStateFlow<UIQueueState>(UIQueueState.empty())
     override val spotifyPlayerState = MutableStateFlow<SpotifyPlayerState>(
         SpotifyPlayerState(
             base = PlayerStateData(
@@ -50,6 +49,10 @@ class FakeMiniPlayerViewModel : IMiniPlayerViewModel {
 
     override fun togglePlayPause() {
         spotifyPlayerState.togglePause()
+    }
+
+    override fun playTrack(trackId: String) {
+        TODO("Not yet implemented")
     }
 
     override fun checkIfTrackSaved(trackId: String) {

@@ -35,7 +35,7 @@ fun SpotifyScreen(
 
     val tag = "SpotifyScreen"
     val sessionState by viewModel.sessionState.collectAsState()
-    val currentUserQueue by viewModel.currentUserQueue.collectAsState()
+    val uIQueueState by viewModel.uIQueueState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.startSpotifyClient(launcher, activity!!)

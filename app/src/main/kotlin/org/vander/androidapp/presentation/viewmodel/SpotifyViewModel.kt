@@ -29,20 +29,19 @@ open class SpotifyViewModel @Inject constructor(
     private val spotifyRepository: ISpotifyRepository,
 ) : ViewModel(), IMiniPlayerViewModel {
 
+    companion object {
+        private const val TAG = "SpotifyViewModel"
+    }
+
     override val spotifyPlayerState: StateFlow<SpotifyPlayerState> =
         spotifyUseCase.spotifyPlayerState
 
     override val sessionState = spotifyUseCase.sessionState
 
+    override val uIQueueState = spotifyUseCase.uIQueueState
+
     private val _playlists = MutableStateFlow<Result<SpotifyPlaylistsResponse>?>(null)
     val playlists: StateFlow<Result<SpotifyPlaylistsResponse>?> = _playlists.asStateFlow()
-
-    private val _queue = MutableStateFlow<SpotifyQueue?>(null)
-    override val currentUserQueue: StateFlow<SpotifyQueue?> = _queue.asStateFlow()
-
-    companion object {
-        private const val TAG = "SpotifyViewModel"
-    }
 
     override fun startSpotifyClient(launcher: ActivityResultLauncher<Intent>, activity: Activity) {
         viewModelScope.launch { spotifyUseCase.startUp(launcher, activity) }
@@ -71,6 +70,12 @@ open class SpotifyViewModel @Inject constructor(
     override fun togglePlayPause() {
         viewModelScope.launch {
             spotifyUseCase.togglePlayPause()
+        }
+    }
+
+    override fun playTrack(trackId: String) {
+        viewModelScope.launch {
+            spotifyUseCase.playTrack(trackId)
         }
     }
 

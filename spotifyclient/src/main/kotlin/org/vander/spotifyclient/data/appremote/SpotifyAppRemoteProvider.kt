@@ -8,6 +8,7 @@ import com.spotify.android.appremote.api.SpotifyAppRemote
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.vander.spotifyclient.BuildConfig
 import org.vander.spotifyclient.domain.appremote.ISpotifyAppRemoteProvider
@@ -30,7 +31,7 @@ class SpotifyAppRemoteProvider @Inject constructor() : ISpotifyAppRemoteProvider
     private var spotifyAppRemote: SpotifyAppRemote? = null
 
     override suspend fun connect(context: Context): Result<Unit> {
-        _remoteState.value = SpotifyRemoteClientState.Connecting
+        _remoteState.update { SpotifyRemoteClientState.Connecting }
 
         return suspendCancellableCoroutine { continuation ->
             val connectionParams = ConnectionParams.Builder(BuildConfig.CLIENT_ID)
@@ -45,12 +46,12 @@ class SpotifyAppRemoteProvider @Inject constructor() : ISpotifyAppRemoteProvider
                     override fun onConnected(remote: SpotifyAppRemote) {
                         Log.d(TAG, "Connected to remote")
                         spotifyAppRemote = remote
-                        _remoteState.value = SpotifyRemoteClientState.Connected
+                        _remoteState.update { SpotifyRemoteClientState.Connected }
                         continuation.resumeWith(Result.success(Result.success(Unit)))
                     }
 
                     override fun onFailure(error: Throwable) {
-                        _remoteState.value = SpotifyRemoteClientState.Failed(error as Exception)
+                        _remoteState.update { SpotifyRemoteClientState.Failed(error as Exception) }
                         Log.e(TAG, "SpotifyAppRemote connection failed", error)
                         continuation.resumeWith(Result.success(Result.failure(error)))
                     }
@@ -63,7 +64,7 @@ class SpotifyAppRemoteProvider @Inject constructor() : ISpotifyAppRemoteProvider
     override fun disconnect() {
         spotifyAppRemote?.let { SpotifyAppRemote.disconnect(it) }
         spotifyAppRemote = null
-        _remoteState.value = SpotifyRemoteClientState.NotConnected
+        _remoteState.update { SpotifyRemoteClientState.NotConnected }
     }
 
 }

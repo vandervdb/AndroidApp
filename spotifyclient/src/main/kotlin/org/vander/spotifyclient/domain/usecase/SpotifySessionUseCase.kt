@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vander.spotifyclient.domain.appremote.ISpotifyAppRemoteProvider
 import org.vander.spotifyclient.domain.auth.IAuthRepository
@@ -39,7 +40,7 @@ class SpotifySessionUseCase @Inject constructor(
     fun requestAuthorization(launchAuth: ActivityResultLauncher<Intent>) {
         Log.d(TAG, "Requesting authorization...")
         launchAuthFlow = launchAuth
-        _sessionState.value = SpotifySessionState.Authorizing
+        _sessionState.update { SpotifySessionState.Authorizing }
     }
 
     fun launchAuthorizationFlow(activity: Activity) {
@@ -48,12 +49,14 @@ class SpotifySessionUseCase @Inject constructor(
             launchAuthFlow?.let {
                 authClient.authorize(activity, it)
             } ?: run {
-                _sessionState.value = SpotifySessionState.Failed(
-                    SpotifySessionError.UnknownError(Exception("Authorization flow not set"))
-                )
+                _sessionState.update {
+                    SpotifySessionState.Failed(
+                        SpotifySessionError.UnknownError(Exception("Authorization flow not set"))
+                    )
+                }
             }
         } catch (e: Exception) {
-            _sessionState.value = SpotifySessionState.Failed(SpotifySessionError.UnknownError(e))
+            _sessionState.update { SpotifySessionState.Failed(SpotifySessionError.UnknownError(e)) }
         }
     }
 
@@ -68,11 +71,13 @@ class SpotifySessionUseCase @Inject constructor(
                     val authCode = authResult.getOrElse { "" }
                     Log.d(TAG, "Launching auth token request...")
                     fetchAndStoreAuthToken(authCode)
-                        .onFailure {
-                            Log.e(TAG, "Error storing access token", it)
-                            _sessionState.value = SpotifySessionState.Failed(
-                                SpotifySessionError.AuthFailed(it)
-                            )
+                        .onFailure { error ->
+                            Log.e(TAG, "Error storing access token", error)
+                            _sessionState.update {
+                                SpotifySessionState.Failed(
+                                    SpotifySessionError.AuthFailed(error)
+                                )
+                            }
                         }
                         .onSuccess {
                             Log.d(TAG, "Access token stored, Connecting to remote...")
@@ -81,16 +86,18 @@ class SpotifySessionUseCase @Inject constructor(
                         }
                 }
             } else {
-                _sessionState.value = SpotifySessionState.Failed(
-                    SpotifySessionError.AuthFailed(Exception("Authorization failed with unknown error"))
-                )
+                _sessionState.update {
+                    SpotifySessionState.Failed(
+                        SpotifySessionError.AuthFailed(Exception("Authorization failed with unknown error"))
+                    )
+                }
             }
         }
     }
 
     suspend fun shutDown() {
         remoteProvider.disconnect()
-        _sessionState.value = SpotifySessionState.Idle
+        _sessionState.update { SpotifySessionState.Idle }
         authRepository.clearAccessToken()
     }
 
@@ -98,17 +105,19 @@ class SpotifySessionUseCase @Inject constructor(
         context: Context,
         coroutineScope: CoroutineScope
     ) {
-        _sessionState.value = SpotifySessionState.ConnectingRemote
+        _sessionState.update { SpotifySessionState.ConnectingRemote }
         coroutineScope.launch(dispatcher) {
             val result = remoteProvider.connect(context)
             if (result.isSuccess) {
                 Log.d(TAG, "SpotifySessionState.Ready")
-                _sessionState.value = SpotifySessionState.Ready
+                _sessionState.update { SpotifySessionState.Ready }
             } else {
                 Log.e(TAG, "Failed to connect to remote", result.exceptionOrNull())
-                _sessionState.value = SpotifySessionState.Failed(
-                    SpotifySessionError.RemoteConnectionFailed(result.exceptionOrNull())
-                )
+                _sessionState.update {
+                    SpotifySessionState.Failed(
+                        SpotifySessionError.RemoteConnectionFailed(result.exceptionOrNull())
+                    )
+                }
             }
         }
     }
