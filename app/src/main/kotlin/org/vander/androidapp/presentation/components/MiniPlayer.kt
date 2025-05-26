@@ -195,7 +195,7 @@ private fun TrackItem(trackName: String, artistName: String) {
         modifier = Modifier.padding(8.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        MarqueeText(
+        MarqueeTextInfinite(
             text = trackName,
             modifier = Modifier.width(120.dp),
         )

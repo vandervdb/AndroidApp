@@ -10,21 +10,26 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.vander.androidapp.presentation.util.drawFadeEdges
 import kotlin.math.max
 import kotlin.math.roundToInt
 
 @Composable
-fun MarqueeText(
+fun MarqueeTextInfinite(
     text: String,
     modifier: Modifier = Modifier,
     textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
     speedPxPerSecond: Float = 60f,
-    spacerDp: androidx.compose.ui.unit.Dp = 24.dp
+    spacer: Dp = 24.dp,
+    fadeEdgeWidth: Dp = 16.dp,
+    fadeColor: Color = MaterialTheme.colorScheme.surface
 ) {
     val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer()
@@ -35,7 +40,7 @@ fun MarqueeText(
 
     val textWidthPx = measured.size.width
     val textHeightPx = measured.size.height
-    val spacerPx = with(density) { spacerDp.toPx().roundToInt() }
+    val spacerPx = with(density) { spacer.toPx().roundToInt() }
 
     val totalLoopWidth = textWidthPx + spacerPx
     val offsetX = remember { Animatable(0f) }
@@ -54,7 +59,9 @@ fun MarqueeText(
     }
 
     Layout(
-        modifier = modifier.clipToBounds(),
+        modifier = modifier
+            .clipToBounds()
+            .drawFadeEdges(edgeWidth = fadeEdgeWidth, fadeColor = fadeColor),
         content = {
             BasicText(
                 text = text,
@@ -78,9 +85,8 @@ fun MarqueeText(
 
         layout(width = constraints.maxWidth, height = textHeightPx) {
             val offset = offsetX.value.roundToInt()
-
             placeables[0].placeRelative(x = offset, y = 0)
-            placeables[1].placeRelative(x = offset + textWidthPx + spacerPx, y = 0)
+            placeables[1].placeRelative(x = offset + totalLoopWidth, y = 0)
         }
     }
 }
