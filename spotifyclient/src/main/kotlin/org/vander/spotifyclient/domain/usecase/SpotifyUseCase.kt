@@ -2,10 +2,8 @@ package org.vander.spotifyclient.domain.usecase
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,12 +12,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.vander.spotifyclient.domain.SpotifySessionManager
 import org.vander.spotifyclient.domain.data.CurrentlyPlayingAndQueue
-import org.vander.spotifyclient.domain.data.SpotifyPlaylistsResponse
 import org.vander.spotifyclient.domain.data.UIQueueItem
 import org.vander.spotifyclient.domain.player.ISpotifyPlayerClient
 import org.vander.spotifyclient.domain.player.repository.IPlayerStateRepository
-import org.vander.spotifyclient.domain.playlist.repository.ISpotifyRepository
+import org.vander.spotifyclient.domain.repository.SpotifyLibraryRepository
 import org.vander.spotifyclient.domain.state.PlayerStateData
 import org.vander.spotifyclient.domain.state.SavedRemotelyChangedState
 import org.vander.spotifyclient.domain.state.SpotifyPlayerState
@@ -33,10 +31,10 @@ import org.vander.spotifyclient.domain.state.update
 import javax.inject.Inject
 
 class SpotifyUseCase @Inject constructor(
-    val sessionUseCase: SpotifySessionUseCase,
+    val sessionUseCase: SpotifySessionManager,
     val remoteUseCase: SpotifyRemoteUseCase,
     val playerStateRepository: IPlayerStateRepository,
-    val spotifyRepository: ISpotifyRepository,
+    val libraryRepository: SpotifyLibraryRepository,
     val playerRepository: IPlayerStateRepository,
     val playerClient: ISpotifyPlayerClient,
 ) {
@@ -46,8 +44,6 @@ class SpotifyUseCase @Inject constructor(
     }
 
     private var activity: Activity? = null
-
-    val sessionState: StateFlow<SpotifySessionState> = sessionUseCase.sessionState
 
     private val _spotifyPlayerState =
         MutableStateFlow<SpotifyPlayerState>(SpotifyPlayerState.empty())
@@ -65,14 +61,9 @@ class SpotifyUseCase @Inject constructor(
     private var hasReceivedUpdatedQueue = false
 
 
-    private val _playlists = MutableStateFlow<Result<SpotifyPlaylistsResponse>?>(null)
-    val playlists: StateFlow<Result<SpotifyPlaylistsResponse>?> = _playlists.asStateFlow()
-
-    suspend fun startUp(launchAuth: ActivityResultLauncher<Intent>, activity: Activity) =
+    suspend fun startUp(activity: Activity) =
         coroutineScope {
             Log.d(TAG, "Starting up...")
-            sessionUseCase.requestAuthorization(launchAuth)
-            sessionUseCase.launchAuthorizationFlow(activity)
             this@SpotifyUseCase.activity = activity
             launch { updateSpotifyPlayerStateAndUIQueueState() } // TODO: Group in one call
             launch { collectSessionState() }
@@ -102,8 +93,16 @@ class SpotifyUseCase @Inject constructor(
         _spotifyPlayerState.setTrackSaved(newSaveState)
     }
 
+    suspend fun skipNext() {
+        playerClient.skipNext()
+    }
+
+    suspend fun skipPrevious() {
+        playerClient.skipPrevious()
+    }
+
     suspend fun playTrack(trackId: String) {
-        playerClient.play(trackId)
+        playerClient.play("spotify:track:$trackId")
     }
 
     private suspend fun collectSessionState() {
@@ -155,7 +154,10 @@ class SpotifyUseCase @Inject constructor(
                 )
                 val matchesCurrent = queueData.currentlyPlaying?.id == playerStateData.trackId
                 if (!matchesCurrent) {
-                    Log.d(TAG, "queueData's currentlyPlaying and playerStateData don't share same trackId")
+                    Log.d(
+                        TAG,
+                        "queueData's currentlyPlaying and playerStateData don't share same trackId"
+                    )
                     remoteUseCase.getAndEmitUserQueueFlow()
                     return@collect
                 }
@@ -175,6 +177,7 @@ class SpotifyUseCase @Inject constructor(
 
             if (hasReceivedUpdatedQueue && playerStateData != PlayerStateData.empty()) {
                 if (!isTrackInQueue(playerStateData.trackId, _uIQueueState.value)) {
+                    Log.d(TAG, "Queue is not updated, so we will request it again")
                     hasReceivedUpdatedQueue = false
                     remoteUseCase.getAndEmitUserQueueFlow()
 //                    return@collect // TODO: Check behaviour
@@ -190,7 +193,7 @@ class SpotifyUseCase @Inject constructor(
     ) {
         Log.d(TAG, "Updating Spotify player state: $playerStateData")
         var currentTrackId = playerStateData?.trackId ?: trackId!!
-        val isSaved = spotifyRepository.isTrackSaved(currentTrackId).getOrDefault(false)
+        val isSaved = libraryRepository.isTrackSaved(currentTrackId).getOrDefault(false)
         val currentPlayerState = _spotifyPlayerState.value
         Log.d(TAG, "(Spotify player state: $currentPlayerState)")
         _spotifyPlayerState.update { currentPlayerState.copyWithSaved(isSaved) }
@@ -204,7 +207,6 @@ class SpotifyUseCase @Inject constructor(
     fun isTrackInQueue(trackIdToFind: String, uIQueueState: UIQueueState): Boolean {
         return uIQueueState.items.any { it.trackId == trackIdToFind }
     }
-
 
 
 }

@@ -22,7 +22,8 @@ class DefaultPlayerStateRepository @Inject constructor(
     private val _playerStateData = MutableStateFlow(PlayerStateData.Companion.empty())
     override val playerStateData: StateFlow<PlayerStateData> = _playerStateData.asStateFlow()
 
-    private val _savedRemotelyChangedState = MutableStateFlow<SavedRemotelyChangedState>(SavedRemotelyChangedState())
+    private val _savedRemotelyChangedState =
+        MutableStateFlow<SavedRemotelyChangedState>(SavedRemotelyChangedState())
     override val savedRemotelyChangedState: StateFlow<SavedRemotelyChangedState> =
         _savedRemotelyChangedState.asStateFlow()
 
@@ -34,7 +35,12 @@ class DefaultPlayerStateRepository @Inject constructor(
         playerClient.subscribeToPlayerState() { newState ->
             if (newState == _playerStateData.value) {
                 Log.d(TAG, "Player state did not change -> saved status changed")
-                _savedRemotelyChangedState.update { SavedRemotelyChangedState(true, newState.trackId) }
+                _savedRemotelyChangedState.update {
+                    SavedRemotelyChangedState(
+                        true,
+                        newState.trackId
+                    )
+                }
                 _savedRemotelyChangedState.update { SavedRemotelyChangedState(false) }  // reset
             }
             _playerStateData.update { newState }

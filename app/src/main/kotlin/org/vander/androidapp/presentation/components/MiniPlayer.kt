@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
@@ -30,20 +29,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import org.vander.androidapp.presentation.components.preview.PreviewMiniPlayerWithLocalCover
 import org.vander.coreui.IMiniPlayerViewModel
 import org.vander.spotifyclient.domain.data.UIQueueItem
 import org.vander.spotifyclient.domain.state.SpotifySessionState
-import org.vander.spotifyclient.domain.state.artistName
 import org.vander.spotifyclient.domain.state.coverId
 import org.vander.spotifyclient.domain.state.isPaused
 import org.vander.spotifyclient.domain.state.trackId
-import org.vander.spotifyclient.domain.state.trackName
 
 @Composable
 fun MiniPlayer(viewModel: IMiniPlayerViewModel) {
@@ -52,10 +54,11 @@ fun MiniPlayer(viewModel: IMiniPlayerViewModel) {
     val uIQueueState by viewModel.uIQueueState.collectAsState()
 
     if (sessionState is SpotifySessionState.Ready) {
+        Log.d("MiniPlayer", "Session is ready")
+        Log.d("MiniPlayer", "Player state: $playerState")
+        Log.d("MiniPlayer", "Queue state: $uIQueueState")
         MiniPlayerContent(
             tracksQueue = uIQueueState.items,
-            trackName = playerState.trackName,
-            artistName = playerState.artistName,
             trackId = playerState.trackId,
             isSaved = playerState.isTrackSaved == true,
             isPaused = playerState.isPaused,
@@ -63,9 +66,13 @@ fun MiniPlayer(viewModel: IMiniPlayerViewModel) {
                 Log.d("MiniPlayer", "Saving track: $it")
                 viewModel.toggleSaveTrack(it)
             },
-            playTrack = {
-                Log.d("MiniPlayer", "Playing track: $it")
-                viewModel.playTrack(it)
+            skipNext = {
+                Log.d("MiniPlayer", "Skipping next track")
+                viewModel.skipNext()
+            },
+            skipPrevious = {
+                Log.d("MiniPlayer", "Skipping previous track")
+                viewModel.skipPrevious()
             },
             onPlayPause = { viewModel.togglePlayPause() },
             cover = {
@@ -81,34 +88,51 @@ fun MiniPlayer(viewModel: IMiniPlayerViewModel) {
 @Composable
 private fun MiniPlayerContent(
     tracksQueue: List<UIQueueItem>,
-    trackName: String,
-    artistName: String,
     trackId: String = "",
     isSaved: Boolean = false,
     isPaused: Boolean,
     onPlayPause: () -> Unit,
     saveTrack: (String) -> Unit,
-    playTrack: (String) -> Unit,
+    skipNext: () -> Unit,
+    skipPrevious: () -> Unit,
     cover: @Composable () -> Unit
 ) {
 
     val pagerState = rememberPagerState(pageCount = { tracksQueue.size })
     val currentTrackId = trackId
+    val currentTrackIndex = tracksQueue.indexOfFirst { it.trackId == currentTrackId }
+
+    var miniplayerSize by remember { mutableIntStateOf(0) }
+
+    /* Workaround to prevent the swipe gesture callback (playTrack(newTrackId)) to be triggered */
+    var suppressSwipeCallback by remember { mutableStateOf(false) }
 
     LaunchedEffect(currentTrackId) {
         val index = tracksQueue.indexOfFirst { it.trackId == currentTrackId }
-        if (index >= 0) {
+        if (index >= 0 && index != pagerState.currentPage) {
+            suppressSwipeCallback = true
             pagerState.animateScrollToPage(index)
+            delay(300)
+            suppressSwipeCallback = false
         }
     }
+    Log.d("MiniPlayer", "MiniPlayer size: $miniplayerSize")
+    LaunchedEffect(pagerState.currentPage) {
+        if (!suppressSwipeCallback) {
+            val newTrackId = tracksQueue.getOrNull(pagerState.currentPage)?.trackId
+            if (newTrackId != null && newTrackId != currentTrackId) {
+                Log.d("MiniPlayer", "Swiped to trackId=$newTrackId")
+                val newTrackIndex = tracksQueue.indexOfFirst { it.trackId == newTrackId }
+                if (currentTrackIndex > newTrackIndex) {
+                    skipPrevious()
+                    skipPrevious()
+                } else {
+                    skipNext()
+                }
 
-//    LaunchedEffect(pagerState.currentPage) {
-//        val newTrackId = tracksQueue.getOrNull(pagerState.currentPage)?.trackId
-//        if (newTrackId != null) {
-//            Log.d("MiniPlayer", "Swiped to trackId=$newTrackId")
-//            playTrack(newTrackId)
-//        }
-//    }
+            }
+        }
+    }
 
     Surface(
         tonalElevation = 4.dp,
@@ -174,7 +198,6 @@ private fun TrackItem(trackName: String, artistName: String) {
         MarqueeText(
             text = trackName,
             modifier = Modifier.width(120.dp),
-            durationMillis = 10000
         )
         Text(
             text = artistName,
@@ -197,8 +220,6 @@ fun MiniPlayerWithPainter(
     if (sessionState is SpotifySessionState.Ready) {
         MiniPlayerContent(
             tracksQueue = uIQueueState.items,
-            trackName = playerState.trackName,
-            artistName = playerState.artistName,
             trackId = playerState.trackId,
             isSaved = playerState.isTrackSaved == true,
             isPaused = playerState.isPaused,
@@ -206,9 +227,13 @@ fun MiniPlayerWithPainter(
                 Log.d("MiniPlayer", "Saving track: $it")
                 viewModel.toggleSaveTrack(it)
             },
-            playTrack = {
-                Log.d("MiniPlayer", "Playing track: $it")
-                viewModel.playTrack(it)
+            skipNext = {
+                Log.d("MiniPlayer", "Skipping next track")
+                viewModel.skipNext()
+            },
+            skipPrevious = {
+                Log.d("MiniPlayer", "Skipping previous track")
+                viewModel.skipPrevious()
             },
             onPlayPause = { viewModel.togglePlayPause() },
             cover = {

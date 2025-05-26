@@ -1,4 +1,4 @@
-package org.vander.spotifyclient.domain.usecase
+package org.vander.spotifyclient.data.session
 
 import android.app.Activity
 import android.content.Context
@@ -10,9 +10,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.vander.spotifyclient.domain.SpotifySessionManager
 import org.vander.spotifyclient.domain.appremote.ISpotifyAppRemoteProvider
 import org.vander.spotifyclient.domain.auth.IAuthRepository
 import org.vander.spotifyclient.domain.auth.ISpotifyAuthClient
@@ -20,30 +20,30 @@ import org.vander.spotifyclient.domain.error.SpotifySessionError
 import org.vander.spotifyclient.domain.state.SpotifySessionState
 import javax.inject.Inject
 
-class SpotifySessionUseCase @Inject constructor(
+class SpotifySessionManagerImpl @Inject constructor(
     private val authClient: ISpotifyAuthClient,
     private val remoteProvider: ISpotifyAppRemoteProvider,
     private val authRepository: IAuthRepository,
-) {
+) : SpotifySessionManager {
     companion object {
-        private const val TAG = "SpotifySessionUseCase"
+        private const val TAG = "SpotifySessionManagerImpl"
     }
 
     val dispatcher = Dispatchers.Main
 
     private val _sessionState = MutableStateFlow<SpotifySessionState>(SpotifySessionState.Idle)
-    val sessionState: StateFlow<SpotifySessionState> = _sessionState.asStateFlow()
+    override val sessionState: StateFlow<SpotifySessionState> = _sessionState
 
     private var launchAuthFlow: ActivityResultLauncher<Intent>? = null
 
 
-    fun requestAuthorization(launchAuth: ActivityResultLauncher<Intent>) {
+    override fun requestAuthorization(launchAuth: ActivityResultLauncher<Intent>) {
         Log.d(TAG, "Requesting authorization...")
         launchAuthFlow = launchAuth
         _sessionState.update { SpotifySessionState.Authorizing }
     }
 
-    fun launchAuthorizationFlow(activity: Activity) {
+    override fun launchAuthorizationFlow(activity: Activity) {
         Log.d(TAG, "Launching authorization flow...")
         try {
             launchAuthFlow?.let {
@@ -60,7 +60,7 @@ class SpotifySessionUseCase @Inject constructor(
         }
     }
 
-    fun handleAuthResult(
+    override fun handleAuthResult(
         context: Context,
         result: ActivityResult,
         coroutineScope: CoroutineScope
@@ -95,7 +95,7 @@ class SpotifySessionUseCase @Inject constructor(
         }
     }
 
-    suspend fun shutDown() {
+    override suspend fun shutDown() {
         remoteProvider.disconnect()
         _sessionState.update { SpotifySessionState.Idle }
         authRepository.clearAccessToken()

@@ -39,7 +39,7 @@ class SpotifyPlayerClient @Inject constructor(
                 val track: Track = it.track
                 Log.d(
                     TAG,
-                    "PlayerClient received new data" + track.name + " by " + track.artist.name +
+                    "PlayerClient received new data: " + track.name + " by " + track.artist.name +
                             "(paused: " + it.isPaused + " / coverUri: " + track.imageUri + ")"
                 )
                 isPlaying = !it.isPaused

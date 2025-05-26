@@ -40,9 +40,11 @@ fun AppNavHost(navController: NavHostController, innerPadding: PaddingValues) {
             SpotifyScreenWrapper(
                 navController = navController,
                 spotifyViewModel = viewModel,
-                launcher = launcher,
-                activity = activity
             )
         }
     }
+}
+
+fun initSpotifySession() {
+
 }

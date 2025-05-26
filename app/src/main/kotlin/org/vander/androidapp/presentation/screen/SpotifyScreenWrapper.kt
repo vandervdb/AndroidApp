@@ -1,8 +1,5 @@
 package org.vander.androidapp.presentation.screen
 
-import android.app.Activity
-import android.content.Intent
-import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,8 +23,6 @@ import org.vander.androidapp.ui.theme.SpotifyGreen
 fun SpotifyScreenWrapper(
     navController: NavController,
     spotifyViewModel: SpotifyViewModel,
-    launcher: ActivityResultLauncher<Intent>,
-    activity: Activity
 ) {
     Scaffold(
         topBar = {
@@ -49,10 +44,7 @@ fun SpotifyScreenWrapper(
         }
     ) { innerPadding ->
         SpotifyScreen(
-            navController = navController,
             viewModel = spotifyViewModel,
-            launcher = launcher,
-            activity = activity,
             modifier = Modifier.padding(innerPadding)
         )
     }

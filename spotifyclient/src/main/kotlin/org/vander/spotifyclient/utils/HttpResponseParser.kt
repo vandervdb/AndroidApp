@@ -11,7 +11,6 @@ suspend inline fun <reified T> HttpResponse.parseSpotifyResult(
     tag: String = "SpotifyApi"
 ): Result<T> {
     val rawBody = this.bodyAsText()
-    Log.d(tag, "Raw body: $rawBody")
     val json = Json { ignoreUnknownKeys = true }
 
     return try {

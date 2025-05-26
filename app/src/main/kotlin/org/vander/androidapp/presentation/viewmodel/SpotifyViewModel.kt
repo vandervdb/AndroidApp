@@ -2,10 +2,8 @@ package org.vander.androidapp.presentation.viewmodel
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,19 +12,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.vander.coreui.IMiniPlayerViewModel
+import org.vander.spotifyclient.domain.SpotifySessionManager
 import org.vander.spotifyclient.domain.data.SpotifyPlaylistsResponse
-import org.vander.spotifyclient.domain.data.SpotifyQueue
-import org.vander.spotifyclient.domain.playlist.repository.ISpotifyRepository
+import org.vander.spotifyclient.domain.repository.SpotifyLibraryRepository
 import org.vander.spotifyclient.domain.state.SpotifyPlayerState
-import org.vander.spotifyclient.domain.usecase.SpotifyRemoteUseCase
 import org.vander.spotifyclient.domain.usecase.SpotifyUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 open class SpotifyViewModel @Inject constructor(
     private val spotifyUseCase: SpotifyUseCase,
-    private val remoteUseCase: SpotifyRemoteUseCase,
-    private val spotifyRepository: ISpotifyRepository,
+    private val spotifyLibraryRepository: SpotifyLibraryRepository,
+    private val sessionManager: SpotifySessionManager
 ) : ViewModel(), IMiniPlayerViewModel {
 
     companion object {
@@ -36,26 +33,23 @@ open class SpotifyViewModel @Inject constructor(
     override val spotifyPlayerState: StateFlow<SpotifyPlayerState> =
         spotifyUseCase.spotifyPlayerState
 
-    override val sessionState = spotifyUseCase.sessionState
+    override val sessionState = sessionManager.sessionState
 
     override val uIQueueState = spotifyUseCase.uIQueueState
 
     private val _playlists = MutableStateFlow<Result<SpotifyPlaylistsResponse>?>(null)
     val playlists: StateFlow<Result<SpotifyPlaylistsResponse>?> = _playlists.asStateFlow()
 
-    override fun startSpotifyClient(launcher: ActivityResultLauncher<Intent>, activity: Activity) {
-        viewModelScope.launch { spotifyUseCase.startUp(launcher, activity) }
-    }
-    
-    override fun shutDownSpotifyClient() {
+    override fun startUp(activity: Activity) {
         viewModelScope.launch {
-            spotifyUseCase.shutDown()
+            spotifyUseCase.startUp(activity)
         }
     }
 
+
     override fun checkIfTrackSaved(trackId: String) {
         viewModelScope.launch {
-            val result = spotifyRepository.isTrackSaved(trackId)
+            val result = spotifyLibraryRepository.isTrackSaved(trackId)
             val isSaved = result.getOrElse { false }
         }
     }
@@ -73,6 +67,18 @@ open class SpotifyViewModel @Inject constructor(
         }
     }
 
+    override fun skipNext() {
+        viewModelScope.launch {
+            spotifyUseCase.skipNext()
+        }
+    }
+
+    override fun skipPrevious() {
+        viewModelScope.launch {
+            spotifyUseCase.skipPrevious()
+        }
+    }
+
     override fun playTrack(trackId: String) {
         viewModelScope.launch {
             spotifyUseCase.playTrack(trackId)
@@ -81,7 +87,7 @@ open class SpotifyViewModel @Inject constructor(
 
     fun saveTrack(trackId: String) {
         viewModelScope.launch {
-            spotifyRepository.saveTrack(trackId).onSuccess {
+            spotifyLibraryRepository.saveTrack(trackId).onSuccess {
                 spotifyUseCase.toggleSaveTrackState(trackId)
             }
                 .onFailure {
@@ -92,7 +98,7 @@ open class SpotifyViewModel @Inject constructor(
 
     fun removeTrackFromSaved(trackId: String) {
         viewModelScope.launch {
-            spotifyRepository.removeTrack(trackId).onSuccess {
+            spotifyLibraryRepository.removeTrack(trackId).onSuccess {
                 spotifyUseCase.toggleSaveTrackState(trackId)
             }
                 .onFailure {

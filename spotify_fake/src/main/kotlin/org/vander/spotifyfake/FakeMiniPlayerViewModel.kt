@@ -1,8 +1,6 @@
 package org.vander.spotifyfake
 
 import android.app.Activity
-import android.content.Intent
-import androidx.activity.result.ActivityResultLauncher
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.vander.coreui.IMiniPlayerViewModel
 import org.vander.spotifyclient.domain.state.PlayerStateData
@@ -36,19 +34,21 @@ class FakeMiniPlayerViewModel : IMiniPlayerViewModel {
         )
     )
 
-    override fun startSpotifyClient(
-        launcher: ActivityResultLauncher<Intent>,
-        activity: Activity
-    ) {
-        TODO("Not yet implemented")
-    }
 
-    override fun shutDownSpotifyClient() {
+    override fun startUp(activity: Activity) {
         TODO("Not yet implemented")
     }
 
     override fun togglePlayPause() {
         spotifyPlayerState.togglePause()
+    }
+
+    override fun skipNext() {
+        TODO("Not yet implemented")
+    }
+
+    override fun skipPrevious() {
+        TODO("Not yet implemented")
     }
 
     override fun playTrack(trackId: String) {

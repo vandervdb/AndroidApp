@@ -3,19 +3,19 @@ package org.vander.spotifyclient.di
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
-import dagger.hilt.android.scopes.ViewModelScoped
+import dagger.hilt.components.SingletonComponent
 import org.vander.spotifyclient.data.remote.datasource.AuthRemoteDataSource
 import org.vander.spotifyclient.data.repository.AutRepository
 import org.vander.spotifyclient.domain.auth.IAuthRepository
 import org.vander.spotifyclient.domain.auth.IDataStoreManager
+import javax.inject.Singleton
 
 @Module
-@InstallIn(ViewModelComponent::class)
+@InstallIn(SingletonComponent::class)
 object AuthProvidesModule {
 
     @Provides
-    @ViewModelScoped
+    @Singleton
     fun provideAuthRepository(
         authRemoteDataSource: AuthRemoteDataSource,
         dataStoreManager: IDataStoreManager
