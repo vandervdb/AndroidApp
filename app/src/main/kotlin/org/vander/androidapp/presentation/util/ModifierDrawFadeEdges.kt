@@ -21,6 +21,7 @@ fun Modifier.drawFadeEdges(
         .drawWithContent {
 
             drawContent()
+
             val width = size.width
 
             drawRect(

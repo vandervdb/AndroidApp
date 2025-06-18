@@ -108,7 +108,7 @@ Déclarez le module dans `settings.gradle.kts` pour l'inclure au projet.
 ## 👨‍💻 Auteur
 
 Développé par **Arnaud Vanderbecq**  
-[GitHub](https://github.com/arnaudvander) · [LinkedIn](https://linkedin.com/in/avanderbecq)
+[GitHub](https://github.com/vandervdb) · [LinkedIn](https://linkedin.com/in/avanderbecq)
 
 ---
 
