@@ -15,6 +15,9 @@
 
 ## 🚀 Aperçu
 
+Application mobile utilisant les dernières stacks techniques.
+L'application utilise l'API Spotify pour la connexion et la gestion dun lecteur audio.
+
 Projet Android construit avec :
 
 - 🖌️ **Jetpack Compose**
